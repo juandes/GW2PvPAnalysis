@@ -1,0 +1,35 @@
+---
+title: "Guild Wars 2 PvP data analysis"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+setwd("~/Development/R/GW2PvPAnalysis")
+df <- read.csv("~/Development/R/GW2PvPAnalysis/GW2_PvP_data.csv", stringsAsFactors=FALSE)
+```
+
+You can also embed plots, for example:
+
+```{r}
+df$X <- NULL
+df$X.1 <- NULL
+df$X.2 <- NULL
+colnames(df) <- c('map', 'red_score', 'blue_score', 'winner', 'red_1', 'red_2', 'red_3',
+                  'red_4', 'red_5', 'blue_1', 'blue_2', 'blue_3', 'blue_4', 'blue_5')
+df$winner[df$red_score > df$blue_score] <- 0
+df$winner[df$red_score < df$blue_score] <- 1
+df[5:14][df[5:14] == 'ele'] <- 1
+df[5:14][df[5:14] == 'engi'] <- 2
+df[5:14][df[5:14] == 'g'] <- 3
+df[5:14][df[5:14] == 'mes'] <- 4
+df[5:14][df[5:14] == 'necro'] <- 5
+df[5:14][df[5:14] == 'ran'] <- 6
+df[5:14][df[5:14] == 't'] <- 7
+df[5:14][df[5:14] == 'war'] <- 8
+```
+
+
