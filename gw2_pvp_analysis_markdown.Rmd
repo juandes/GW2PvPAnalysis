@@ -8,6 +8,10 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r}
+library(ggplot2)
+```
+
+```{r}
 setwd("~/Development/R/GW2PvPAnalysis")
 df <- read.csv("~/Development/R/GW2PvPAnalysis/GW2_PvP_data.csv", stringsAsFactors=FALSE)
 ```
@@ -31,5 +35,78 @@ df[5:14][df[5:14] == 'ran'] <- 6
 df[5:14][df[5:14] == 't'] <- 7
 df[5:14][df[5:14] == 'war'] <- 8
 ```
+
+###The maps
+```{r}
+table(df$map)
+
+qplot(map, data=df, geom="histogram", main = "Histogram of map usage", xlab = "Map", ylab="Count",
+      fill=I("blue")) +
+  scale_x_discrete(breaks = 1:4, labels = c("1" = "Kyhlo","2" = "Niflhel", "3" = "Foefire",
+                                            "4" = "Silent Storm"))
+```
+
+Percentage of maps
+```{r}
+prop.table(table(df$map)) #percentage of map
+```
+
+The previous table shows the percentage of map selection for all the four maps available on ranked PvP. The first column is for the Battle of Kyhlo map (12.60%), followed by Forest of Niflhel (44.54%), Legacy of the Foefire (27.73%) and the last column is for Temple of the Silent Storm (15.12%)
+
+###The score
+The following table show the frequency of wins for both the red team and the blue team.
+```{r}
+winnerdf <- as.data.frame(table(df$winner))
+colnames(winnerdf) <- c("Team", "Frequency")
+winnerdf[,1] <- c("Red team", "Blue team")
+winnerdf
+```
+The red team won `r 49/(49+70) * 100`% while the blue team won `r 70 / (49+70) * 100`% of the matches.
+
+The next topic to discuss are the scores of the matches. A match in Guild Wars 2, ends when a team reach a score of 500 (or more). The next plot show how the score of the winning team is distributed.
+
+####Winner scores
+The next list shows the final score of the winning team of all the matches, summary of the data and the standard deviation.
+
+```{r}
+winner_score <- pmax(df$red_score, df$blue_score)
+summary(winner_score)
+print(sd(winner_score))
+```
+
+As expected, the final scores does not vary that much (most of them are close to 500) with some them, way over 500 as is the case of the max value of 624. This last remark is because in one of the maps (Legacy of the Foefire), there is an objective that gives 150 points to a team.
+
+####Losers score
+
+Unlike the winner's score, the final score of the loser team could be anything from 0 (if you are really bad) up to 499 (in most cases).
+
+The following list shows the scores of the loser's team.
+
+```{r}
+loser_score <- pmin(df$red_score, df$blue_score)
+loser_score
+```
+
+The scores are more varied that the winner scores.
+
+The next table shows a summary of this scores, followed by the standard deviation.
+
+```{r}
+summary(loser_score)
+print(sd(loser_score))
+```
+
+The table shows that during one game, the team who lost, just obtained 10 points (ouch!), the average was 328.2 and the max was 491 (so close). The standard deviation is `r print(sd(loser_score))`, a value greater than the standard deviation for of the winner's score because the values are more varied.
+
+The following plots shows this information
+
+```{r}
+hist(loser_score, prob=TRUE, col="grey")# prob=TRUE for probabilities not counts
+lines(density(loser_score), col="blue", lwd=2) # add a density estimate with defaults
+lines(density(loser_score, adjust=2), lty="dotted", col="darkgreen", lwd=2) #smoother
+```
+
+
+
 
 
