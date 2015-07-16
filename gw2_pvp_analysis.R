@@ -52,3 +52,4 @@ print(sd(loser_score))
 hist(loser_score, prob=TRUE, col="grey")# prob=TRUE for probabilities not counts
 lines(density(loser_score), col="blue", lwd=2) # add a density estimate with defaults
 lines(density(loser_score, adjust=2), lty="dotted", col="darkgreen", lwd=2) #smoother
+
