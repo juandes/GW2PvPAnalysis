@@ -1,4 +1,6 @@
-library(ggplot2)
+require(ggplot2)
+require(reshape2)
+
 
 setwd("~/Development/R/GW2PvPAnalysis")
 df <- read.csv("~/Development/R/GW2PvPAnalysis/GW2_PvP_data.csv", stringsAsFactors=FALSE)
@@ -53,3 +55,16 @@ hist(loser_score, prob=TRUE, col="grey")# prob=TRUE for probabilities not counts
 lines(density(loser_score), col="blue", lwd=2) # add a density estimate with defaults
 lines(density(loser_score, adjust=2), lty="dotted", col="darkgreen", lwd=2) #smoother
 
+score_per_map <- data.frame(match_number = seq(1,119), map = df$map, red_score = df$red_score,
+                            blue_score = df$blue_score, winner = df$winner)
+table(score_per_map)
+winners_and_score <- table(df$map, df$winner)
+winners_and_score <- data.frame(map = c('Battle of Kyhlo','Forest of Niflhel','Legacy of the Foefire','Temple of the Silent Storm'), 
+                                red_team = winners_and_score[,1], blue_team = winners_and_score[,2], stringsAsFactors=FALSE)
+
+winners_and_score <- melt(winners_and_score, id='map')
+colnames(winners_and_score) <- c('Map', 'Team', 'Frequency')
+ggplot(data=winners_and_score, aes(x=Team, y=Frequency, fill=Team))+
+  geom_bar(stat='identity') +
+  facet_wrap(~Map) +
+  ggtitle("Scores of both teams per map")

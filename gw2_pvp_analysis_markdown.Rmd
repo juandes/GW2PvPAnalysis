@@ -10,18 +10,19 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r}
+```{r, echo=FALSE}
 library(ggplot2)
+require(reshape2)
 ```
 
-```{r}
+```{r, echo=FALSE}
 setwd("~/Development/R/GW2PvPAnalysis")
 df <- read.csv("~/Development/R/GW2PvPAnalysis/GW2_PvP_data.csv", stringsAsFactors=FALSE)
 ```
 
 You can also embed plots, for example:
 
-```{r}
+```{r, echo=FALSE}
 df$X <- NULL
 df$X.1 <- NULL
 df$X.2 <- NULL
@@ -40,7 +41,7 @@ df[5:14][df[5:14] == 'war'] <- 8
 ```
 
 ###The maps
-```{r}
+```{r,echo=FALSE}
 table(df$map)
 
 qplot(map, data=df, geom="histogram", main = "Histogram of map usage", xlab = "Map", ylab="Count",
@@ -50,34 +51,78 @@ qplot(map, data=df, geom="histogram", main = "Histogram of map usage", xlab = "M
 ```
 
 Percentage of maps
-```{r}
+```{r,echo=FALSE}
 prop.table(table(df$map)) #percentage of map
 ```
 
 The previous table shows the percentage of map selection for all the four maps available on ranked PvP. The first column is for the Battle of Kyhlo map (12.60%), followed by Forest of Niflhel (44.54%), Legacy of the Foefire (27.73%) and the last column is for Temple of the Silent Storm (15.12%)
 
-###The score
+##Score and result of the matches
+###Overall view of the score and result
+
+
+Sacar las diferencia entre score del winner y loser (el gap que hay) por mapa
 The following table show the frequency of wins for both the red team and the blue team.
-```{r}
+```{r,echo=FALSE}
 winnerdf <- as.data.frame(table(df$winner))
 colnames(winnerdf) <- c("Team", "Frequency")
 winnerdf[,1] <- c("Red team", "Blue team")
 winnerdf
 ```
-The red team won `r 49/(49+70) * 100`% while the blue team won `r 70 / (49+70) * 100`% of the matches.
+The red team won `r 49/(49+70) * 100`% while the blue team won `r 70 / (49+70) * 100`% of the matches. The percentages of victories per map follows this same pattern. In the map Battle of Kyhlo, the red team won `r 7/(7+8)*100`% of the matches and the blue team won `r 8/(7+8)*100`%, making this the only map where the blue team obtained more victories than the red team. For the next map, Forest of Niflhel, the respective percentages were `r 21/(21+32)*100`% and `r 32/(21+32)*100`, for Legacy of the Foefire `r 11/(11+22)*100` and for Temple of the Silent Storm `r 10/(10+8)*100`% and `r 8/(10+8)*100`%. 
 
-The next topic to discuss are the scores of the matches. Here, we will take a look at how distributed these scores were and we will show some statistics about them in addition to some plots. Before continuing, we would like to mention (for those of you who do not know about Guild Wars 2) that a match in GW2 ends when one of the both teams reach a score greater or equal to 500.
+The next table shows this and it is followed by three different plots. The first one presents the frequency of victories of both teams across all the maps, and the others two present the scores of both teams.
 
-####Winner scores
-The next list shows the final score of the winning team of all the matches, summary of the data and the standard deviation.
-
-```{r}
-winner_score <- pmax(df$red_score, df$blue_score)
-summary(winner_score)
-print(sd(winner_score))
+```{r, echo=FALSE}
+wins.per.map <- table(df$map, df$winner)
+wins.per.map <- data.frame(map = c('Battle of Kyhlo','Forest of Niflhel',
+                                   'Legacy of the Foefire','Temple of the Silent Storm'),
+                           red_team = wins.per.map[,1], blue_team = wins.per.map[,2],
+                           stringsAsFactors=FALSE)
+                                
+wins.per.map.percentage <- wins.per.map
+wins.per.map.percentage$red.team.win.percent <- wins.per.map$red_team/(wins.per.map$red_team +
+                                                                       wins.per.map$blue_team)*100
+wins.per.map.percentage$blue.team.win.percent <- wins.per.map$blue_team/(wins.per.map$red_team +
+                                                                         wins.per.map$blue_team)*100
+wins.per.map.percentage
 ```
 
-As expected, the final scores does not vary that much (most of them are close to 500) with some them, way over 500 as is the case of the max value of 624. This last remark is because in one of the maps (Legacy of the Foefire), there is an objective that gives 150 points to a team.
+```{r,echo=FALSE}
+
+
+winners_and_score <- melt(wins.per.map, id='map')
+colnames(winners_and_score) <- c('Map', 'Team', 'Frequency')
+ggplot(data=winners_and_score, aes(x=Team, y=Frequency, fill=Team))+
+  geom_bar(stat='identity') +
+  facet_wrap(~Map) +
+  ggtitle("Scores of both teams per map")
+```
+
+```{r, echo=FALSE}
+scoresdf <- data.frame(match_number = seq(1,119), red_score = df$red_score, blue_score = df$blue_score, map = df$map)
+qplot(match_number, red_score, data = scoresdf, size = red_score, alpha = red_score, colour = "red") + theme(legend.position = "none")
+qplot(match_number, blue_score, data = scoresdf, size = blue_score, alpha = blue_score, colour = blue_score) + theme(legend.position = "none")
+```
+
+The next topic to discuss are the scores of the matches. Here, we will take a look at how distributed these scores are and we will show some statistics about them accompanied by several plots. 
+
+####Final scores of the winning team
+In this section we will take a look at a summary of the final scores of the winners of all the 
+119 matches recorded in this dataset. Before continuining, we would like to mention
+that a PvP match in Guild Wars 2 ends when one of the both teams reach a score 
+greater or equal to 500.
+
+```{r, echo=FALSE}
+winner.score <- pmax(df$red_score, df$blue_score)
+summary(winner.score)
+```
+
+As expected, the final scores does not vary that much (most of them are close to 500) 
+with some them, way over 500 as is the case of the max value of 624; the standard 
+deviation of the scores is `r sd(winner.score)`. The reason regarding the score 
+of 624 is because one of the maps (Legacy of the Foefire), has an objective that 
+gives 150 points to a team.
 
 ####Losers score
 
@@ -99,18 +144,19 @@ summary(loser_score)
 print(sd(loser_score))
 ```
 
-The summary table shows that during one game, the team who lost, just obtained 10 points (ouch!), making this the minimum value across the whole dataset, while the average was 328.2 and the max was 491 (so close to winning). We also calculated the standard deviation, which is `r print(sd(loser_score))`, a value greater than the standard deviation of the winner's score, which was `r print(sd(winner_score))`. The following two figures shows these results via a histogram (that includes a density line) and a boxplot.
+The summary table shows that during one game, the team who lost, just obtained 10 points (ouch!), making this the minimum value across the whole dataset, while the average was 328.2 and the max was 491 (so close to winning). We also calculated the standard deviation, which is `r print(sd(loser_score))`, a value greater than the standard deviation of the winner's score, which was `r print(sd(winner.score))`. The following two figures shows these results via a histogram (that includes a density line) and a boxplot.
 
 ```{r}
 hist(loser_score, prob=TRUE, col="grey")# prob=TRUE for probabilities not counts
+rug(loser_score)
 lines(density(loser_score), col="blue", lwd=2) # add a density estimate with defaults
 lines(density(loser_score, adjust=2), lty="dotted", col="darkgreen", lwd=2) #smoother
 ```
 
 The histogram shows that the score of the defeated team during most matches was in the range of 350 to 400 and that there were a few games where the score of the defeated team was less than 100.
 
-```{r}
-boxplot(loser_score)
+```{r, echo=FALSE}
+boxplot(loser_score, main = "Scores of the defeated team", ylab = "Score")
 boxplot.stats(loser_score)$out
 ```
 
