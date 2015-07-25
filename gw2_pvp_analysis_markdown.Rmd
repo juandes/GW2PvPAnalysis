@@ -6,13 +6,11 @@ output: html_document
 ##Introduction
 
 ##Codebook and dataset
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r, echo=FALSE}
 library(ggplot2)
 require(reshape2)
+require(dplyr)
 ```
 
 ```{r, echo=FALSE}
@@ -23,13 +21,21 @@ df <- read.csv("~/Development/R/GW2PvPAnalysis/GW2_PvP_data.csv", stringsAsFacto
 You can also embed plots, for example:
 
 ```{r, echo=FALSE}
+#Remove unnecessary columns
 df$X <- NULL
 df$X.1 <- NULL
 df$X.2 <- NULL
-colnames(df) <- c('map', 'red_score', 'blue_score', 'winner', 'red_1', 'red_2', 'red_3',
-                  'red_4', 'red_5', 'blue_1', 'blue_2', 'blue_3', 'blue_4', 'blue_5')
+
+#Rename columns
+colnames(df) <- c('map', 'red_score', 'blue_score', 'winner', 'red_1', 'red_2', 
+                  'red_3', 'red_4', 'red_5', 'blue_1', 'blue_2', 'blue_3', 'blue_4',
+                  'blue_5')
+
+#If the red team won, the value is 0, otherwise 1
 df$winner[df$red_score > df$blue_score] <- 0
 df$winner[df$red_score < df$blue_score] <- 1
+
+#Change the names of the classes for numbers
 df[5:14][df[5:14] == 'ele'] <- 1
 df[5:14][df[5:14] == 'engi'] <- 2
 df[5:14][df[5:14] == 'g'] <- 3
@@ -44,34 +50,51 @@ df[5:14][df[5:14] == 'war'] <- 8
 ```{r,echo=FALSE}
 table(df$map)
 
-qplot(map, data=df, geom="histogram", main = "Histogram of map usage", xlab = "Map", ylab="Count",
-      fill=I("blue")) +
+qplot(map, data=df, geom="histogram", main = "Histogram of map usage", xlab = "Map",
+      ylab="Count", fill=I("blue")) +
   scale_x_discrete(breaks = 1:4, labels = c("1" = "Kyhlo","2" = "Niflhel", "3" = "Foefire",
                                             "4" = "Silent Storm"))
 ```
 
 Percentage of maps
 ```{r,echo=FALSE}
-prop.table(table(df$map)) #percentage of map
+prop.table(table(df$map))
 ```
 
-The previous table shows the percentage of map selection for all the four maps available on ranked PvP. The first column is for the Battle of Kyhlo map (12.60%), followed by Forest of Niflhel (44.54%), Legacy of the Foefire (27.73%) and the last column is for Temple of the Silent Storm (15.12%)
+The previous table shows the percentage of map selection for all the four maps 
+available on ranked PvP. The first column is for the Battle of Kyhlo map (12.60%),
+followed by Forest of Niflhel (44.54%), Legacy of the Foefire (27.73%) and the 
+last column is for Temple of the Silent Storm (15.12%).
 
 ##Score and result of the matches
+
+This part of the analysis is related to the scores the matches and the results.
+First, we will give an overview of the final scores and the outcome of the matches,
+followed by an in depth view at the scores of the victor teams and the defeated
+teams.
+
 ###Overall view of the score and result
 
+We will start this section by displaying a table with the frequency of wins for
+both teams.
 
-Sacar las diferencia entre score del winner y loser (el gap que hay) por mapa
-The following table show the frequency of wins for both the red team and the blue team.
 ```{r,echo=FALSE}
 winnerdf <- as.data.frame(table(df$winner))
 colnames(winnerdf) <- c("Team", "Frequency")
 winnerdf[,1] <- c("Red team", "Blue team")
 winnerdf
 ```
-The red team won `r 49/(49+70) * 100`% while the blue team won `r 70 / (49+70) * 100`% of the matches. The percentages of victories per map follows this same pattern. In the map Battle of Kyhlo, the red team won `r 7/(7+8)*100`% of the matches and the blue team won `r 8/(7+8)*100`%, making this the only map where the blue team obtained more victories than the red team. For the next map, Forest of Niflhel, the respective percentages were `r 21/(21+32)*100`% and `r 32/(21+32)*100`, for Legacy of the Foefire `r 11/(11+22)*100` and for Temple of the Silent Storm `r 10/(10+8)*100`% and `r 8/(10+8)*100`%. 
 
-The next table shows this and it is followed by three different plots. The first one presents the frequency of victories of both teams across all the maps, and the others two present the scores of both teams.
+The red team won 49 of the matches or `r round(49/(49 + 70)*100, 2)`% while the 
+blue team won 70 or `r round(70/(49+70)*100, 2)`% of the matches. The percentages 
+of victories per map follows this same pattern. In the map Battle of Kyhlo, the 
+red team won `r round(7/(7+8)*100, 2)`% of the matches and the blue team won 
+`r round(8/(7+8)*100, 2)`%, making this the only map where the blue team obtained
+more victories than the red team. For the next map, Forest of Niflhel, the 
+respective percentages were `r round(21/(21+32)*100, 2)`% and 
+`r round(32/(21+32)*100, 2)`%, for Legacy of the Foefire `r round(11/(11+22)*100, 2)`% 
+and for Temple of the Silent Storm, `r round(10/(10+8)*100, 2)`% and
+`r round(8/(10+8)*100, 2)`%. This is shown in the next table.
 
 ```{r, echo=FALSE}
 wins.per.map <- table(df$map, df$winner)
@@ -88,9 +111,72 @@ wins.per.map.percentage$blue.team.win.percent <- wins.per.map$blue_team/(wins.pe
 wins.per.map.percentage
 ```
 
+Next, we will discuss the gap between the final scores of the matches.
+
+```{r, echo=FALSE}
+df$score.difference <- abs(df$red_score - df$blue_score)
+score.difference.summary <- summary(df$score.difference)
+score.difference.summary
+```
+
+As seen on the previous table, the was a match where one of the teams lost by 9
+points while on the other hand, there was another match where the defeated team,
+lost by 528 points. The next histogram shows the distribution of the score
+differences. Afterwards, we will display the same kind of histograms for the score
+difference by map.
+
+```{r, echo=FALSE}
+hist(df$score.difference, prob = TRUE)
+rug(df$score.difference)
+lines(density(df$score.difference), col="blue", lwd=2)
+lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+```
+
+Battle of Kyhlo
+
+```{r, echo=FALSE}
+hist(filter(df, map == 1)$score.difference, prob = TRUE)
+rug(filter(df, map == 1)$score.difference)
+lines(density(df$score.difference), col="blue", lwd=2)
+lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+```
+
+Forest of Niflhel
+
+```{r, echo=FALSE}
+hist(filter(df, map == 2)$score.difference, prob = TRUE)
+rug(filter(df, map == 2)$score.difference)
+lines(density(df$score.difference), col="blue", lwd=2)
+lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+```
+
+Legacy of the Foefire
+
+```{r, echo=FALSE}
+hist(filter(df, map == 3)$score.difference, prob = TRUE)
+rug(filter(df, map == 3)$score.difference)
+lines(density(df$score.difference), col="blue", lwd=2)
+lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+```
+
+Temple of the Silent Storm
+
+```{r, echo=FALSE}
+hist(filter(df, map == 4)$score.difference, prob = TRUE)
+rug(filter(df, map == 4)$score.difference)
+lines(density(df$score.difference), col="blue", lwd=2)
+lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+```
+
+
+
+Now we will present four visualizations. The first one presents the frequency of
+victories of both teams across all the maps, the following two present the scores
+of both teams and the last one is a scatterplot the final score of each match of
+both teams.
+
+
 ```{r,echo=FALSE}
-
-
 winners_and_score <- melt(wins.per.map, id='map')
 colnames(winners_and_score) <- c('Map', 'Team', 'Frequency')
 ggplot(data=winners_and_score, aes(x=Team, y=Frequency, fill=Team))+
@@ -103,6 +189,24 @@ ggplot(data=winners_and_score, aes(x=Team, y=Frequency, fill=Team))+
 scoresdf <- data.frame(match_number = seq(1,119), red_score = df$red_score, blue_score = df$blue_score, map = df$map)
 qplot(match_number, red_score, data = scoresdf, size = red_score, alpha = red_score, colour = "red") + theme(legend.position = "none")
 qplot(match_number, blue_score, data = scoresdf, size = blue_score, alpha = blue_score, colour = blue_score) + theme(legend.position = "none")
+```
+
+```{r, echo=FALSE}
+qplot(x = df$red_score, y = df$blue_score, geom = "point", alpha = I(0.5), size = I(5))
+```
+
+The previous scatterplot shows the relation between the final scores of both teams.
+Those points on the upper left corner and bottom right are matches where one of
+the teams won by a great difference. If we perform a correlation test on these values,
+we obtained a correlation of `r cor(df$red_score, df$blue_score)`, which means
+that there is some kind of (negative) correlation on the data. To further confirm
+this, we calculated the p-value (found after this) which by being so small implies
+there is a strong evidence against the null hypothesis, which is that the correlation
+is 0 (no relation between both scores).
+
+This table presents correlation, p-value and other statistics.
+```{r, echo=FALSE}
+cor.test(df$red_score, df$blue_score)
 ```
 
 The next topic to discuss are the scores of the matches. Here, we will take a look at how distributed these scores are and we will show some statistics about them accompanied by several plots. 
@@ -151,6 +255,7 @@ hist(loser_score, prob=TRUE, col="grey")# prob=TRUE for probabilities not counts
 rug(loser_score)
 lines(density(loser_score), col="blue", lwd=2) # add a density estimate with defaults
 lines(density(loser_score, adjust=2), lty="dotted", col="darkgreen", lwd=2) #smoother
+#Hacer esto mismo por map
 ```
 
 The histogram shows that the score of the defeated team during most matches was in the range of 350 to 400 and that there were a few games where the score of the defeated team was less than 100.
@@ -168,10 +273,14 @@ The next table shows a summary of the boxplot.
 boxplot.stats(loser_score)$stats
 ```
 
-The values represent the minimum, first quartile, median, third quartile and maximum.
+The values represent the minimum, first quartile, median, third quartile and 
+maximum.
 
+### Composition of the teams
 
-Has un plot que tenga los dos scores por juego.
+- What's the outcome of the match when a team is made of 4 or more of the same profession?
+- What's the most common composition? The less common?
+- How many teams were incomplete?
 
 
 

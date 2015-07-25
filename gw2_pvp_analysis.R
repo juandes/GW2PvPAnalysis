@@ -57,10 +57,17 @@ lines(density(loser_score, adjust=2), lty="dotted", col="darkgreen", lwd=2) #smo
 
 score_per_map <- data.frame(match_number = seq(1,119), map = df$map, red_score = df$red_score,
                             blue_score = df$blue_score, winner = df$winner)
-table(score_per_map)
-winners_and_score <- table(df$map, df$winner)
-winners_and_score <- data.frame(map = c('Battle of Kyhlo','Forest of Niflhel','Legacy of the Foefire','Temple of the Silent Storm'), 
-                                red_team = winners_and_score[,1], blue_team = winners_and_score[,2], stringsAsFactors=FALSE)
+wins.per.map <- table(df$map, df$winner)
+wins.per.map <- data.frame(map = c('Battle of Kyhlo','Forest of Niflhel',
+                                   'Legacy of the Foefire','Temple of the Silent Storm'),
+                           red_team = wins.per.map[,1], blue_team = wins.per.map[,2],
+                           stringsAsFactors=FALSE)
+                                
+wins.per.map.percentage <- wins.per.map
+wins.per.map.percentage$red.team.win.percent <- wins.per.map$red_team/(wins.per.map$red_team+
+                                                                       wins.per.map$blue_team)*100
+wins.per.map.percentage$blue.team.win.percent <- wins.per.map$blue_team/(wins.per.map$red_team+
+                                                                         wins.per.map$blue_team)*100
 
 winners_and_score <- melt(winners_and_score, id='map')
 colnames(winners_and_score) <- c('Map', 'Team', 'Frequency')
@@ -68,3 +75,6 @@ ggplot(data=winners_and_score, aes(x=Team, y=Frequency, fill=Team))+
   geom_bar(stat='identity') +
   facet_wrap(~Map) +
   ggtitle("Scores of both teams per map")
+
+df$score.difference <- abs(df$red_score - df$blue_score)
+
