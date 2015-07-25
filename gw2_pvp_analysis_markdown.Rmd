@@ -46,7 +46,7 @@ df[5:14][df[5:14] == 't'] <- 7
 df[5:14][df[5:14] == 'war'] <- 8
 ```
 
-###The maps
+##The maps
 ```{r,echo=FALSE}
 table(df$map)
 
@@ -211,7 +211,7 @@ cor.test(df$red_score, df$blue_score)
 
 The next topic to discuss are the scores of the matches. Here, we will take a look at how distributed these scores are and we will show some statistics about them accompanied by several plots. 
 
-####Final scores of the winning team
+###Final scores of the winning team
 In this section we will take a look at a summary of the final scores of the winners of all the 
 119 matches recorded in this dataset. Before continuining, we would like to mention
 that a PvP match in Guild Wars 2 ends when one of the both teams reach a score 
@@ -228,7 +228,7 @@ deviation of the scores is `r sd(winner.score)`. The reason regarding the score
 of 624 is because one of the maps (Legacy of the Foefire), has an objective that 
 gives 150 points to a team.
 
-####Losers score
+###Losers score
 
 Unlike the winner's score, the final score of the loser team could be anything from 0 (if you are really bad) up to 499 (in most cases).
 
@@ -276,7 +276,56 @@ boxplot.stats(loser_score)$stats
 The values represent the minimum, first quartile, median, third quartile and 
 maximum.
 
-### Composition of the teams
+## Composition of the teams
+
+The last part of this analysis is about the composition of the teams. Here, we
+will study the structure of the teams while answering several questions on the way.
+This section will follow a similar structure to the previous ones. We will start 
+with a summary and then a detailed analysis about certain topics. Besides this, 
+this section introduces several machine learning algorithms that will be used to 
+try to predict the outcome of the matches based on the composition of the team 
+and the map where the match was played.
+
+As mentioned before, our dataset is made of 119 matches. For this reason, we
+actually have 238 observations of team composition (because there are two teams
+per match).
+
+### Summary of team composition
+
+This section will start with a summary of the structure of the teams. We will
+present the composition of the teams in terms of professions or classes. In
+addition to this, we will be showing the amount of teams that were incomplete.
+
+The first question we will answer is: What is the frequency and percentage of 
+professions across the dataset?
+
+```{r, echo=FALSE}
+team.composition <- data.frame(class.1 = numeric(0), class.2 = numeric(0), 
+                               class.3 = numeric(0), class.4 = numeric(0), 
+                               class.5 = numeric(0))
+red.team.composition <- df[5:9]
+blue.team.composition <- df[10:14]
+colnames(red.team.composition) <- c("class.1", "class.2", "class.3", "class.4", 
+                                    "class.5")
+colnames(blue.team.composition) <- c("class.1", "class.2", "class.3", "class.4",
+                                     "class.5")
+team.composition <- rbind(team.composition, red.team.composition, blue.team.composition)
+```
+
+
+#### What is the frequency and percentage of professions across the dataset?
+
+```{r, echo=FALSE}
+frequency.percentage.classes <- sapply(1:8, function(class.number) 
+  sum(sapply(team.composition, function(x) sum(x == class.number))))
+frequency.percentage.classes <- as.data.frame(frequency.percentage.classes)
+rownames(frequency.percentage.classes) <- c("Elementalist", "Engineer", "Guardian", "Mesmer",
+                                 "Necromancer", "Ranger", "Thief", "Warrior")
+colnames(frequency.percentage.classes) <- c("Frequency")
+frequency.percentage.classes$Percentage <- frequency.percentage.classes$Frequency/(sum(frequency.percentage.classes$Frequency) + 17) * 100 # 17 missing players.
+frequency.percentage.classes
+```
+
 
 - What's the outcome of the match when a team is made of 4 or more of the same profession?
 - What's the most common composition? The less common?

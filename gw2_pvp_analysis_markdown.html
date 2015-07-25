@@ -83,8 +83,9 @@ img {
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
 <p>You can also embed plots, for example:</p>
-<div id="the-maps" class="section level3">
-<h3>The maps</h3>
+</div>
+<div id="the-maps" class="section level2">
+<h2>The maps</h2>
 <pre><code>## 
 ##  1  2  3  4 
 ## 15 53 33 18</code></pre>
@@ -94,7 +95,6 @@ img {
 ##         1         2         3         4 
 ## 0.1260504 0.4453782 0.2773109 0.1512605</code></pre>
 <p>The previous table shows the percentage of map selection for all the four maps available on ranked PvP. The first column is for the Battle of Kyhlo map (12.60%), followed by Forest of Niflhel (44.54%), Legacy of the Foefire (27.73%) and the last column is for Temple of the Silent Storm (15.12%).</p>
-</div>
 </div>
 <div id="score-and-result-of-the-matches" class="section level2">
 <h2>Score and result of the matches</h2>
@@ -147,15 +147,16 @@ img {
 ##        cor 
 ## -0.5939152</code></pre>
 <p>The next topic to discuss are the scores of the matches. Here, we will take a look at how distributed these scores are and we will show some statistics about them accompanied by several plots.</p>
-<div id="final-scores-of-the-winning-team" class="section level4">
-<h4>Final scores of the winning team</h4>
+</div>
+<div id="final-scores-of-the-winning-team" class="section level3">
+<h3>Final scores of the winning team</h3>
 <p>In this section we will take a look at a summary of the final scores of the winners of all the 119 matches recorded in this dataset. Before continuining, we would like to mention that a PvP match in Guild Wars 2 ends when one of the both teams reach a score greater or equal to 500.</p>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##   500.0   500.0   501.0   504.3   501.0   624.0</code></pre>
 <p>As expected, the final scores does not vary that much (most of them are close to 500) with some them, way over 500 as is the case of the max value of 624; the standard deviation of the scores is 16.6342219. The reason regarding the score of 624 is because one of the maps (Legacy of the Foefire), has an objective that gives 150 points to a team.</p>
 </div>
-<div id="losers-score" class="section level4">
-<h4>Losers score</h4>
+<div id="losers-score" class="section level3">
+<h3>Losers score</h3>
 <p>Unlike the winner’s score, the final score of the loser team could be anything from 0 (if you are really bad) up to 499 (in most cases).</p>
 <p>The following list shows the scores of the loser’s team.</p>
 <pre class="r"><code>loser_score &lt;- pmin(df$red_score, df$blue_score)
@@ -190,8 +191,31 @@ lines(density(loser_score, adjust=2), lty=&quot;dotted&quot;, col=&quot;darkgree
 <p>The values represent the minimum, first quartile, median, third quartile and maximum.</p>
 </div>
 </div>
-<div id="composition-of-the-teams" class="section level3">
-<h3>Composition of the teams</h3>
+<div id="composition-of-the-teams" class="section level2">
+<h2>Composition of the teams</h2>
+<p>The last part of this analysis is about the composition of the teams. Here, we will study the structure of the teams while answering several questions on the way. This section will follow a similar structure to the previous ones. We will start with a summary and then a detailed analysis about certain topics. Besides this, this section introduces several machine learning algorithms that will be used to try to predict the outcome of the matches based on the composition of the team and the map where the match was played.</p>
+<p>As mentioned before, our dataset is made of 119 matches. For this reason, we actually have 238 observations of team composition (because there are two teams per match).</p>
+<div id="summary-of-team-composition" class="section level3">
+<h3>Summary of team composition</h3>
+<p>This section will start with a summary of the structure of the teams. We will present the composition of the teams in terms of professions or classes. In addition to this, we will be showing the amount of teams that were incomplete.</p>
+<p>The first question we will answer is: What is the frequency and percentage of professions across the dataset?</p>
+<div id="what-is-the-frequency-and-percentage-of-professions-across-the-dataset" class="section level4">
+<h4>What is the frequency and percentage of professions across the dataset?</h4>
+<pre><code>##              Frequency Percentage
+## Elementalist       113   9.503785
+## Engineer            70   5.887300
+## Guardian           155  13.036165
+## Mesmer             124  10.428932
+## Necromancer        111   9.335576
+## Ranger             298  25.063078
+## Thief              160  13.456686
+## Warrior            141  11.858705</code></pre>
+<ul>
+<li>What’s the outcome of the match when a team is made of 4 or more of the same profession?</li>
+<li>What’s the most common composition? The less common?</li>
+<li>How many teams were incomplete?</li>
+</ul>
+</div>
 </div>
 </div>
 

@@ -51,8 +51,8 @@ summary(loser_score)
 print(sd(loser_score))
 
 
-hist(loser_score, prob=TRUE, col="grey")# prob=TRUE for probabilities not counts
-lines(density(loser_score), col="blue", lwd=2) # add a density estimate with defaults
+hist(loser_score, prob=TRUE, col="grey")
+lines(density(loser_score), col="blue", lwd=2)
 lines(density(loser_score, adjust=2), lty="dotted", col="darkgreen", lwd=2) #smoother
 
 score_per_map <- data.frame(match_number = seq(1,119), map = df$map, red_score = df$red_score,
@@ -64,9 +64,9 @@ wins.per.map <- data.frame(map = c('Battle of Kyhlo','Forest of Niflhel',
                            stringsAsFactors=FALSE)
                                 
 wins.per.map.percentage <- wins.per.map
-wins.per.map.percentage$red.team.win.percent <- wins.per.map$red_team/(wins.per.map$red_team+
+wins.per.map.percentage$red.team.win.percent <- wins.per.map$red_team / (wins.per.map$red_team +
                                                                        wins.per.map$blue_team)*100
-wins.per.map.percentage$blue.team.win.percent <- wins.per.map$blue_team/(wins.per.map$red_team+
+wins.per.map.percentage$blue.team.win.percent <- wins.per.map$blue_team / (wins.per.map$red_team +
                                                                          wins.per.map$blue_team)*100
 
 winners_and_score <- melt(winners_and_score, id='map')
@@ -78,3 +78,38 @@ ggplot(data=winners_and_score, aes(x=Team, y=Frequency, fill=Team))+
 
 df$score.difference <- abs(df$red_score - df$blue_score)
 
+#Team composition
+team.composition <- data.frame(class.1 = numeric(0), class.2 = numeric(0), 
+                               class.3 = numeric(0), class.4 = numeric(0), 
+                               class.5 = numeric(0))
+red.team.composition <- df[5:9]
+blue.team.composition <- df[10:14]
+colnames(red.team.composition) <- c("class.1", "class.2", "class.3", "class.4", "class.5")
+colnames(blue.team.composition) <- c("class.1", "class.2", "class.3", "class.4", "class.5")
+team.composition <- rbind(team.composition, red.team.composition, blue.team.composition)
+
+#ddply(team.composition,names(team.composition),summarize, Freq = length(class.1))
+
+#team.composition[, apply(team.composition, 2, function(X) any((as.numeric(X)) == 1))]
+
+
+#apply(team.composition, 1, function(X) any(as.numeric(X) == 1))
+
+
+
+#Subset those columns where any column has one of those classes
+team.composition[apply(team.composition, 1, function(X) any(as.numeric(X) == 2)),] #WORKS!!!
+
+
+team.composition[apply(team.composition, 1, function(X) any(table(X) >= 4)),]
+
+
+ddply(team.composition,names(team.composition),summarize, Freq = length(class.1)) # Frequency
+
+#sapply(1:8, function(class.number) nrow(team.composition[apply(team.composition, 1, function(X) any(as.numeric(X) == class.number)),]))
+engis <- team.composition[apply(team.composition, 1, function(X) any(as.numeric(X) == 2)),]
+#sapply(1:8, function(class) nrow(team.composition[apply(team.composition, 1, function(X) any(as.numeric(X) == class)),]) / nrow(team.composition) * 100)
+
+
+lol <- sapply(1:8, function(class.number) team.composition[apply(team.composition, 1, function(X) any(as.numeric(X) == class.number)),])
+sum(sapply(engis, function(x) sum(x == 2)))
