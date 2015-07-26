@@ -1,7 +1,6 @@
 require(ggplot2)
 require(reshape2)
 
-
 setwd("~/Development/R/GW2PvPAnalysis")
 df <- read.csv("~/Development/R/GW2PvPAnalysis/GW2_PvP_data.csv", stringsAsFactors=FALSE)
 
@@ -101,7 +100,7 @@ team.composition <- rbind(team.composition, red.team.composition, blue.team.comp
 team.composition[apply(team.composition, 1, function(X) any(as.numeric(X) == 2)),] #WORKS!!!
 
 
-team.composition[apply(team.composition, 1, function(X) any(table(X) >= 4)),]
+team.composition[apply(team.composition, 1, function(X) any(table(X) >= 3)),]
 
 
 ddply(team.composition,names(team.composition),summarize, Freq = length(class.1)) # Frequency
@@ -113,3 +112,23 @@ engis <- team.composition[apply(team.composition, 1, function(X) any(as.numeric(
 
 lol <- sapply(1:8, function(class.number) team.composition[apply(team.composition, 1, function(X) any(as.numeric(X) == class.number)),])
 sum(sapply(engis, function(x) sum(x == 2)))
+
+
+
+____
+
+
+
+scores.for.red <- df$winner # 1 means red lose, 0 means red won (0 means victory, 1 defeat)
+scores.for.blue <- sapply(df$winner, function(x) if (x == 1) { 0 } else { 1 })
+scores.for.red <- as.data.frame(scores.for.red)
+scores.for.blue <- as.data.frame(scores.for.blue)
+colnames(scores.for.red) <- c("Result")
+colnames(scores.for.blue) <- c("Result")
+
+team.composition.result <- data.frame(result = numeric(0))
+team.composition.result <- rbind(team.composition.result, scores.for.red, scores.for.blue)
+
+match.result <- data.frame(Result = numeric(nrow(scores.for.red) * 2))
+match.result[1:nrow(scores.for.red), ] <- scores.for.red
+match.result[120:238, ] <- scores.for.blue

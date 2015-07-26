@@ -8,9 +8,11 @@ output: html_document
 ##Codebook and dataset
 
 ```{r, echo=FALSE}
-library(ggplot2)
+require(ggplot2)
 require(reshape2)
+require(plyr)
 require(dplyr)
+
 ```
 
 ```{r, echo=FALSE}
@@ -322,14 +324,115 @@ frequency.percentage.classes <- as.data.frame(frequency.percentage.classes)
 rownames(frequency.percentage.classes) <- c("Elementalist", "Engineer", "Guardian", "Mesmer",
                                  "Necromancer", "Ranger", "Thief", "Warrior")
 colnames(frequency.percentage.classes) <- c("Frequency")
-frequency.percentage.classes$Percentage <- frequency.percentage.classes$Frequency/(sum(frequency.percentage.classes$Frequency) + 17) * 100 # 17 missing players.
+frequency.percentage.classes$Percentage <- round(frequency.percentage.classes$Frequency/(sum(frequency.percentage.classes$Frequency) + 17) * 100, 2) # 17 missing players.
 frequency.percentage.classes
 ```
 
+We can see that the most common class across the matches was the Ranger, with a
+frequency of 299 (25.12%), however, the reason why this number much larger than
+the other frequencies is the fact that all the matches we did was using a Ranger,
+so every single match had at least one Ranger. On the other end, there is the
+Engineer, with a frequency of 70 (5.88%).
 
-- What's the outcome of the match when a team is made of 4 or more of the same profession?
-- What's the most common composition? The less common?
-- How many teams were incomplete?
+If the percentages are summed, the result is 
+`r round(sum(frequency.percentage.classes$Percentage), 2)`, instead of 100%. This
+bring us to other next question: What is the amount of missing players?
+
+#### What is the amount of missing players?
+
+```{r, echo=FALSE}
+frequency.percentage.missing.players <- sum(sapply(team.composition, function(x) sum(x == 0)))
+frequency.percentage.missing.players <- as.data.frame(frequency.percentage.missing.players)
+rownames(frequency.percentage.missing.players) <- c("Missing players")
+colnames(frequency.percentage.missing.players) <- c("Frequency")
+frequency.percentage.missing.players$Percentage <- round(frequency.percentage.missing.players$Frequency/(sum(frequency.percentage.classes$Frequency) + 17) * 100, 2) # 17 missing players.
+frequency.percentage.missing.players
+```
+
+17 players were missing. We do not know if these players were missing since the
+beginning of the game (for some reason sometimes teams can contain less than 5 players),
+or if they disconnected. 
+
+#### Is there a repeated team composition?
+
+In this question we looked for those team compositions that appears more than once.
+
+```{r, echo=FALSE}
+frequent.teams <- ddply(team.composition,names(team.composition),summarize, 
+                        Frequency = length(class.1))
+frequent.teams <- frequent.teams[frequent.teams$Frequency > 1,]
+frequent.teams[1:5][frequent.teams[1:5] == 5] <- "Necromancer"
+frequent.teams[1:5][frequent.teams[1:5] == 8] <- "Warrior"
+frequent.teams[1:5][frequent.teams[1:5] == 6] <- "Ranger"
+frequent.teams[1:5][frequent.teams[1:5] == 1] <- "Elementalist"
+frequent.teams[1:5][frequent.teams[1:5] == 7] <- "Thief"
+frequent.teams[1:5][frequent.teams[1:5] == 3] <- "Guardian"
+frequent.teams
+```
+
+As the table shows, there were three team configurations that were repeated more
+than once.
+
+#### What is the outcome of the match when a team is made of 3 or more of the same profession?
+
+```{r, echo=FALSE}
+# Find matches that had at least 3 of the same professions
+three.or.more <- team.composition[apply(team.composition, 1, function(X) any(table(X) >= 3)),]
+
+
+
+scores.for.red <- df$winner # 1 means red lose, 0 means red won (0 means victory, 1 defeat)
+scores.for.blue <- sapply(df$winner, function(x) if (x == 1) { 0 } else { 1 })
+scores.for.red <- as.data.frame(scores.for.red)
+scores.for.blue <- as.data.frame(scores.for.blue)
+colnames(scores.for.red) <- c("Result")
+colnames(scores.for.blue) <- c("Result")
+team.composition.result <- data.frame(result = numeric(0))
+team.composition.result <- rbind(team.composition.result, scores.for.red, scores.for.blue)
+# Get the result of the matches. We are using df[4] twice because of the structure
+# of team.composition dataframe
+#team.composition.result <- data.frame(result = numeric(0))
+#team.composition.result <- rbind(team.composition.result, df[4], df[4])
+
+# Get the result of the particular matches using the indexes of three.or.more
+three.or.more <- cbind(three.or.more, 
+                       result = team.composition.result[as.numeric(rownames(three.or.more)),])
+#three.or.more.result <- team.composition.result[as.numeric(rownames(three.or.more)),]
+#three.or.more.teams <- c(rep.int(0, 119), rep.int(1, 119))
+#three.or.more.teams <- data.frame(team = numeric(nrow(team.composition)))
+#three.or.more.teams$team[120: nrow(three.or.more.teams)] <- 1
+#three.or.more.teams$team <- rbind(three.or.more.teams, rep(1,100))
+#three.or.more.teams <- c(rep.int(0, 119), rep.int(1, 119))
+#three.or.more <- cbind(three.or.more, 
+                       #team = three.or.more.teams[as.numeric(rownames(three.or.more)),])
+
+```
+
+In the dataset there are `r nrow(three.or.more)` teams that has at least 3
+characters playing the same class. Of those `r nrow(three.or.more)` teams,
+`r nrow(three.or.more[three.or.more$result == 0,])` won the matches.
+
+These are the composition of those teams.
+
+```{r, echo=FALSE}
+three.or.more.victory <- three.or.more[three.or.more$result == 0,]
+three.or.more.victory[three.or.more.victory == 1] <- "Elementalist"
+three.or.more.victory[three.or.more.victory == 2] <- "Engineer"
+three.or.more.victory[three.or.more.victory == 3] <- "Guardian"
+three.or.more.victory[three.or.more.victory == 4] <- "Mesmer"
+three.or.more.victory[three.or.more.victory == 5] <- "Necromancer"
+three.or.more.victory[three.or.more.victory == 6] <- "Ranger"
+three.or.more.victory[three.or.more.victory == 7] <- "Thief"
+three.or.more.victory[three.or.more.victory == 8] <- "Warrior"
+three.or.more.victory
+```
+
+
+MACHINE LEARNING
+
+Naive Bayes y Random Forest
+Usa solo los teams independiente y su resultado
+cbind de team.composition y team.composition.result
 
 
 
