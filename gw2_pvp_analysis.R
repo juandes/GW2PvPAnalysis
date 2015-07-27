@@ -132,3 +132,12 @@ team.composition.result <- rbind(team.composition.result, scores.for.red, scores
 match.result <- data.frame(Result = numeric(nrow(scores.for.red) * 2))
 match.result[1:nrow(scores.for.red), ] <- scores.for.red
 match.result[120:238, ] <- scores.for.blue
+
+
+_____
+Machine learning
+
+team.result <- cbind(team.composition, team.composition.result)
+colnames(team.result)[6] <- "result"
+team.result$result[team.result$result == 0 ] <- "won"
+team.result$result[team.result$result == 1 ] <- "lost"

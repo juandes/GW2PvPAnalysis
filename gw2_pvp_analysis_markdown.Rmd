@@ -12,7 +12,8 @@ require(ggplot2)
 require(reshape2)
 require(plyr)
 require(dplyr)
-
+require(randomForest)
+require(e1071)
 ```
 
 ```{r, echo=FALSE}
@@ -428,11 +429,101 @@ three.or.more.victory
 ```
 
 
-MACHINE LEARNING
+#### Is it possible to predict the outcome of a match based on the structure of the team?
 
-Naive Bayes y Random Forest
-Usa solo los teams independiente y su resultado
-cbind de team.composition y team.composition.result
+```{r, echo=FALSE}
+team.result <- cbind(team.composition, team.composition.result)
+colnames(team.result)[6] <- "result"
+team.result$result[team.result$result == 0 ] <- "won"
+team.result$result[team.result$result == 1 ] <- "lost"
+team.result$result <- as.factor(team.result$result)
+```
+The last section of this analysis, introduces two classification models, naive
+Bayes classifier and random forest, that will learn from our data with the purpose
+of classifying the outcome of a match based on the composition of the team. The
+two possible outcome are victory or defeat.
+
+The basic idea behind these classifiers could be divided in two parts. During
+the first part, often called the training part, the model is feeded with data that
+already have the outcome of the match. In other words, we are teaching the model.
+The table below, shows an example of this. It has the structure of the team
+(3 rangers, presented with the number 6 and two quitters, presented as 0), and
+the result, which is 'lost'.
+
+```{r, echo=FALSE}
+team.result[1,]
+```
+
+During the second part, after the training is completed, we will send differerent
+team compositions to the model and it will output the outcome of the match based
+on what it already learned.
+
+The dataset will be split 70% for training and 30% for testing.
+
+##### Random Forest
+
+The following table is a direct output that has information about the model and
+the results.
+
+```{r, echo=FALSE}
+index <- sample(2, nrow(team.result), replace=TRUE, prob=c(0.8, 0.2))
+train.data <- team.result[index == 1, ]
+test.data <- team.result[index == 2, ]
+
+# Create the random forest model and train it.
+rf <- randomForest(result ~ ., data = train.data, ntree = 70, proximity = TRUE)
+confusion.matrix.rf <- table(predict(rf), train.data$result)
+classification.error <- round((confusion.matrix.rf[2, 1] + confusion.matrix.rf[1, 2]) /
+                           sum(confusion.matrix.rf) * 100, 2)
+rf
+
+# Prediction using the test data
+pred <- predict(rf, test.data)
+pred.confusion.matrix <- table(pred, test.data$result)
+test.classification.error <- round((pred.confusion.matrix[2, 1] + pred.confusion.matrix[1, 2]) /
+                                     sum(pred.confusion.matrix) * 100, 2)
+```
+
+The model report an error rate of `r classification.error`%, in other words
+`r classification.error`% of the classifications performed during training,
+were incorrect. More details about this can be found at the confusion matrix at
+the bottom of the table.
+
+The testing dataset had a classification error of `r test.classification.error`%.
+This is the confusion matrix:
+
+```{r, echo=FALSE}                           
+pred.confusion.matrix
+```
+
+##### Naive Bayes classifier
+
+```{r, echo=FALSE}
+#Create and train the model
+bayes.classifier <- naiveBayes(result ~ ., data = train.data)
+train.data <- as.data.frame(cbind(class.1 = as.numeric(train.data$class.1), 
+                                  class.2 = as.numeric(train.data$class.2),
+                                  class.3 = as.numeric(train.data$class.3), 
+                                  class.4 = as.numeric(train.data$class.4),
+                                  class.5 = as.numeric(train.data$class.5), 
+                                  result = as.numeric(train.data$result)))
+pred <- predict(bayes.classifier, train.data)
+table(pred, train.data$result)
+bayes.classifier
+
+#Test the model
+
+test.data <- as.data.frame(cbind(class.1 = as.numeric(test.data$class.1), 
+                                 class.2 = as.numeric(test.data$class.2),
+                                 class.3 = as.numeric(test.data$class.3), 
+                                 class.4 = as.numeric(test.data$class.4),
+                                 class.5 = as.numeric(test.data$class.5), 
+                                 result = as.numeric(test.data$result)))
+bayes.prediction <- predict(bayes.classifier, test.data)
+bayes.pred.confusion.matrix <- table(bayes.prediction, test.data$result)
+
+bayes.pred.confusion.matrix
+```
 
 
 
