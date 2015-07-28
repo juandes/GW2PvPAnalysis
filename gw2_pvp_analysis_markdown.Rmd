@@ -1,19 +1,17 @@
 ---
-title: "Guild Wars 2 PvP data analysis"
+title: "Guild Wars 2 PvP Data Analysis"
+author: "Juan De Dios Santos, @jdiossantos"
 output: html_document
 ---
 
-##Introduction
-
-##Codebook and dataset
-
-```{r, echo=FALSE}
+```{r, echo=FALSE, include=FALSE}
 require(ggplot2)
 require(reshape2)
 require(plyr)
 require(dplyr)
 require(randomForest)
 require(e1071)
+set.seed(3392)
 ```
 
 ```{r, echo=FALSE}
@@ -21,7 +19,6 @@ setwd("~/Development/R/GW2PvPAnalysis")
 df <- read.csv("~/Development/R/GW2PvPAnalysis/GW2_PvP_data.csv", stringsAsFactors=FALSE)
 ```
 
-You can also embed plots, for example:
 
 ```{r, echo=FALSE}
 #Remove unnecessary columns
@@ -30,48 +27,103 @@ df$X.1 <- NULL
 df$X.2 <- NULL
 
 #Rename columns
-colnames(df) <- c('map', 'red_score', 'blue_score', 'winner', 'red_1', 'red_2', 
-                  'red_3', 'red_4', 'red_5', 'blue_1', 'blue_2', 'blue_3', 'blue_4',
-                  'blue_5')
+colnames(df) <- c("map", "red.score", "blue_score", "winner", "red_1", "red_2", 
+                  "red_3", "red_4", "red_5", "blue_1", "blue_2", "blue_3", "blue_4",
+                  "blue_5")
 
 #If the red team won, the value is 0, otherwise 1
-df$winner[df$red_score > df$blue_score] <- 0
-df$winner[df$red_score < df$blue_score] <- 1
+df$winner[df$red.score > df$blue_score] <- 0
+df$winner[df$red.score < df$blue_score] <- 1
 
 #Change the names of the classes for numbers
-df[5:14][df[5:14] == 'ele'] <- 1
-df[5:14][df[5:14] == 'engi'] <- 2
-df[5:14][df[5:14] == 'g'] <- 3
-df[5:14][df[5:14] == 'mes'] <- 4
-df[5:14][df[5:14] == 'necro'] <- 5
-df[5:14][df[5:14] == 'ran'] <- 6
-df[5:14][df[5:14] == 't'] <- 7
-df[5:14][df[5:14] == 'war'] <- 8
+df[5:14][df[5:14] == "ele"] <- 1
+df[5:14][df[5:14] == "engi"] <- 2
+df[5:14][df[5:14] == "g"] <- 3
+df[5:14][df[5:14] == "mes"] <- 4
+df[5:14][df[5:14] == "necro"] <- 5
+df[5:14][df[5:14] == "ran"] <- 6
+df[5:14][df[5:14] == "t"] <- 7
+df[5:14][df[5:14] == "war"] <- 8
 ```
 
-##The maps
-```{r,echo=FALSE}
-table(df$map)
+## Introduction
 
-qplot(map, data=df, geom="histogram", main = "Histogram of map usage", xlab = "Map",
-      ylab="Count", fill=I("blue")) +
-  scale_x_discrete(breaks = 1:4, labels = c("1" = "Kyhlo","2" = "Niflhel", "3" = "Foefire",
+------
+
+The game Guild Wars 2, release on 2012, introduces a player versus player (PvP)
+game mode called Conquest. In Conquest, there are two teams made of five players,
+and the main objective is to seize capture points to increase your team score
+(the more points you have, the faster the score increases); other ways to increase
+the score if by killing players of the opposing team, non-player characters (NPC)
+or by getting special bonuses.
+
+This work is a data analysis done on a dataset made of 119 Conquest matches. In
+the analysis we will take a look at several factors regarding a Conquest match,
+such as the map where the match was played, the final score of both teams, the result
+of the match and the composition of the teams.
+
+## The dataset
+
+------
+
+As mentioned before, the dataset consists of 119 matches done during April and
+May 2015 and in the following table we will show the first five observations
+of the dataset.
+
+```{r, echo=FALSE}
+head(df)
+```
+
+The first column is the map where the match was played. The next two are the final
+scores for the red and blue team, followed by the winner (0 means the red team won,
+and 1 means blue won). The last ten columns are about the structure of the team in
+terms of profession or classes. The first five colums represent the composition 
+of the red team and the other five, the blue team.
+
+For those of you interested, this is the codebook of what the number means.
+
+* The maps: 1 is Battle of Kyhlo, 2 is Forest of Niflhel, 3 is Legacy of the Foefire
+and 4 is for Temple of the Silent Storm.
+* The classes: 0 is an empty slot (someone who never joined the match, was
+disconnected, or quitted), 1 is Elementalist, 2 is Engineer, 3 is Guardian, 4 is
+Mesmer, 5 is Necromancer, 6 is Ranger, 7 is Thief and 8 is Warrior.
+
+
+
+
+# The maps
+***
+
+In the first section of this report, we took a look at the maps and the frequency
+each one of them had of being selected. The next table shows the frequency and
+percentage of usage of each map.
+
+```{r,echo=FALSE}
+# Create frequency table of map usage
+map.frequency.percentage.table <- as.data.frame(table(df$map))
+map.frequency.percentage.table <- cbind(map.frequency.percentage.table,
+                                        sapply(as.data.frame(prop.table(table(df$map)))[,2],
+                                                       function(x) round(x * 100, 2)))
+colnames(map.frequency.percentage.table) <- c("Map", "Frequency", "Percentage")
+rownames(map.frequency.percentage.table) <- c("Battle of Kyhlo", "Forest of Niflhel",
+                                   "Legacy of the Foefire", "Temple of the Silent Storm")
+map.frequency.percentage.table
+
+# Histogram of map usage
+qplot(map, data = df, geom = "histogram", main = "Histogram of map usage", xlab = "Map",
+      ylab = "Frequency", fill = I("blue")) +
+  scale_x_discrete(breaks = 1:4, labels = c("1" = "Kyhlo", "2" = "Niflhel", "3" = "Foefire",
                                             "4" = "Silent Storm"))
 ```
 
-Percentage of maps
-```{r,echo=FALSE}
-prop.table(table(df$map))
-```
-
-The previous table shows the percentage of map selection for all the four maps 
-available on ranked PvP. The first column is for the Battle of Kyhlo map (12.60%),
-followed by Forest of Niflhel (44.54%), Legacy of the Foefire (27.73%) and the 
-last column is for Temple of the Silent Storm (15.12%).
+As seen by both the table and plot, the most selected map was Forest of Niflhel,
+with a percentage of `r map.frequency.percentage.table[2, 3]`% and the least selected,
+was Temple of the Silent Storm with `r map.frequency.percentage.table[4, 3]`%.
 
 ##Score and result of the matches
+***
 
-This part of the analysis is related to the scores the matches and the results.
+This part of the analysis is related to the scores the result of the matches.
 First, we will give an overview of the final scores and the outcome of the matches,
 followed by an in depth view at the scores of the victor teams and the defeated
 teams.
@@ -88,7 +140,7 @@ winnerdf[,1] <- c("Red team", "Blue team")
 winnerdf
 ```
 
-The red team won 49 of the matches or `r round(49/(49 + 70)*100, 2)`% while the 
+The red team won 49 of the matches or `r round(49/(49 + 70)*100, 2)`%, while the 
 blue team won 70 or `r round(70/(49+70)*100, 2)`% of the matches. The percentages 
 of victories per map follows this same pattern. In the map Battle of Kyhlo, the 
 red team won `r round(7/(7+8)*100, 2)`% of the matches and the blue team won 
@@ -101,74 +153,90 @@ and for Temple of the Silent Storm, `r round(10/(10+8)*100, 2)`% and
 
 ```{r, echo=FALSE}
 wins.per.map <- table(df$map, df$winner)
-wins.per.map <- data.frame(map = c('Battle of Kyhlo','Forest of Niflhel',
-                                   'Legacy of the Foefire','Temple of the Silent Storm'),
-                           red_team = wins.per.map[,1], blue_team = wins.per.map[,2],
+
+# Create data frame with the teams, their frequency of victories and percentage
+wins.per.map <- data.frame(map = c("Battle of Kyhlo","Forest of Niflhel",
+                                   "Legacy of the Foefire","Temple of the Silent Storm"),
+                           red.team = wins.per.map[,1], blue.team = wins.per.map[,2],
                            stringsAsFactors=FALSE)
                                 
 wins.per.map.percentage <- wins.per.map
-wins.per.map.percentage$red.team.win.percent <- wins.per.map$red_team/(wins.per.map$red_team +
-                                                                       wins.per.map$blue_team)*100
-wins.per.map.percentage$blue.team.win.percent <- wins.per.map$blue_team/(wins.per.map$red_team +
-                                                                         wins.per.map$blue_team)*100
+wins.per.map.percentage$red.team.win.percent <- round(wins.per.map$red.team / (wins.per.map$red.team +
+                                                                         wins.per.map$blue.team)*100, 2)
+wins.per.map.percentage$blue.team.win.percent <- round(wins.per.map$blue.team / (wins.per.map$red.team +
+                                                                           wins.per.map$blue.team)*100, 2)
+colnames(wins.per.map.percentage) <- c("Map", "Red team victories", "Blue team victories",
+                                       "Red team win %", "Blue team win %")
 wins.per.map.percentage
 ```
+
+### Final score differences
 
 Next, we will discuss the gap between the final scores of the matches.
 
 ```{r, echo=FALSE}
-df$score.difference <- abs(df$red_score - df$blue_score)
+df$score.difference <- abs(df$red.score - df$blue_score)
 score.difference.summary <- summary(df$score.difference)
 score.difference.summary
 ```
 
-As seen on the previous table, the was a match where one of the teams lost by 9
+The previous table is a summary of the differences between final scores of a match.
+It shows that there was a match where one of the teams lost by 9
 points while on the other hand, there was another match where the defeated team,
-lost by 528 points. The next histogram shows the distribution of the score
-differences. Afterwards, we will display the same kind of histograms for the score
-difference by map.
+lost by 528 points. The following five histograms shows the distribution of
+the final score differences. The first histogram is for the difference across
+all the matches and the following four, are per map.
+
 
 ```{r, echo=FALSE}
-hist(df$score.difference, prob = TRUE)
+hist(df$score.difference, prob = TRUE, main = "Gap between final scores (overall)",
+     xlab = "Score difference")
 rug(df$score.difference)
-lines(density(df$score.difference), col="blue", lwd=2)
-lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+lines(density(df$score.difference), col="blue", lwd = 2)
+lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen",
+      lwd = 2)
 ```
 
-Battle of Kyhlo
+#### Battle of Kyhlo
 
 ```{r, echo=FALSE}
-hist(filter(df, map == 1)$score.difference, prob = TRUE)
+hist(filter(df, map == 1)$score.difference, prob = TRUE,
+     main = "Gap between final scores (Battle of Kyhlo)", xlab = "Score difference")
 rug(filter(df, map == 1)$score.difference)
-lines(density(df$score.difference), col="blue", lwd=2)
-lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+lines(density(df$score.difference), col="blue", lwd = 2)
+lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen", 
+      lwd = 2)
 ```
 
-Forest of Niflhel
+#### Forest of Niflhel
 
 ```{r, echo=FALSE}
-hist(filter(df, map == 2)$score.difference, prob = TRUE)
+hist(filter(df, map == 2)$score.difference, prob = TRUE,
+     main = "Gap between final scores (Forest of Niflhel)", xlab = "Score difference")
 rug(filter(df, map == 2)$score.difference)
-lines(density(df$score.difference), col="blue", lwd=2)
-lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+lines(density(df$score.difference), col="blue", lwd = 2)
+lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen",
+      lwd = 2)
 ```
 
-Legacy of the Foefire
+#### Legacy of the Foefire
 
 ```{r, echo=FALSE}
-hist(filter(df, map == 3)$score.difference, prob = TRUE)
+hist(filter(df, map == 3)$score.difference, prob = TRUE,
+     main = "Gap between final scores (Legacy of the Foefire)", xlab = "Score difference")
 rug(filter(df, map == 3)$score.difference)
-lines(density(df$score.difference), col="blue", lwd=2)
-lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+lines(density(df$score.difference), col="blue", lwd = 2)
+lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen", lwd = 2)
 ```
 
-Temple of the Silent Storm
+#### Temple of the Silent Storm
 
 ```{r, echo=FALSE}
-hist(filter(df, map == 4)$score.difference, prob = TRUE)
+hist(filter(df, map == 4)$score.difference, prob = TRUE,
+     main = "Gap between final scores (Temple of the Silent Storm)", xlab = "Score difference")
 rug(filter(df, map == 4)$score.difference)
-lines(density(df$score.difference), col="blue", lwd=2)
-lines(density(df$score.difference, adjust=2), lty="dotted", col="darkgreen", lwd=2)
+lines(density(df$score.difference), col="blue", lwd = 2)
+lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen", lwd = 2)
 ```
 
 
@@ -180,28 +248,28 @@ both teams.
 
 
 ```{r,echo=FALSE}
-winners_and_score <- melt(wins.per.map, id='map')
-colnames(winners_and_score) <- c('Map', 'Team', 'Frequency')
+winners_and_score <- melt(wins.per.map, id="map")
+colnames(winners_and_score) <- c("Map", "Team", "Frequency")
 ggplot(data=winners_and_score, aes(x=Team, y=Frequency, fill=Team))+
-  geom_bar(stat='identity') +
+  geom_bar(stat="identity") +
   facet_wrap(~Map) +
   ggtitle("Scores of both teams per map")
 ```
 
 ```{r, echo=FALSE}
-scoresdf <- data.frame(match_number = seq(1,119), red_score = df$red_score, blue_score = df$blue_score, map = df$map)
-qplot(match_number, red_score, data = scoresdf, size = red_score, alpha = red_score, colour = "red") + theme(legend.position = "none")
+scoresdf <- data.frame(match_number = seq(1,119), red.score = df$red.score, blue_score = df$blue_score, map = df$map)
+qplot(match_number, red.score, data = scoresdf, size = red.score, alpha = red.score, colour = "red") + theme(legend.position = "none")
 qplot(match_number, blue_score, data = scoresdf, size = blue_score, alpha = blue_score, colour = blue_score) + theme(legend.position = "none")
 ```
 
 ```{r, echo=FALSE}
-qplot(x = df$red_score, y = df$blue_score, geom = "point", alpha = I(0.5), size = I(5))
+qplot(x = df$red.score, y = df$blue_score, geom = "point", alpha = I(0.5), size = I(5))
 ```
 
 The previous scatterplot shows the relation between the final scores of both teams.
 Those points on the upper left corner and bottom right are matches where one of
 the teams won by a great difference. If we perform a correlation test on these values,
-we obtained a correlation of `r cor(df$red_score, df$blue_score)`, which means
+we obtained a correlation of `r cor(df$red.score, df$blue_score)`, which means
 that there is some kind of (negative) correlation on the data. To further confirm
 this, we calculated the p-value (found after this) which by being so small implies
 there is a strong evidence against the null hypothesis, which is that the correlation
@@ -209,7 +277,7 @@ is 0 (no relation between both scores).
 
 This table presents correlation, p-value and other statistics.
 ```{r, echo=FALSE}
-cor.test(df$red_score, df$blue_score)
+cor.test(df$red.score, df$blue_score)
 ```
 
 The next topic to discuss are the scores of the matches. Here, we will take a look at how distributed these scores are and we will show some statistics about them accompanied by several plots. 
@@ -221,7 +289,7 @@ that a PvP match in Guild Wars 2 ends when one of the both teams reach a score
 greater or equal to 500.
 
 ```{r, echo=FALSE}
-winner.score <- pmax(df$red_score, df$blue_score)
+winner.score <- pmax(df$red.score, df$blue_score)
 summary(winner.score)
 ```
 
@@ -238,7 +306,7 @@ Unlike the winner's score, the final score of the loser team could be anything f
 The following list shows the scores of the loser's team.
 
 ```{r}
-loser_score <- pmin(df$red_score, df$blue_score)
+loser_score <- pmin(df$red.score, df$blue_score)
 loser_score
 ```
 
@@ -456,7 +524,8 @@ team.result[1,]
 
 During the second part, after the training is completed, we will send differerent
 team compositions to the model and it will output the outcome of the match based
-on what it already learned.
+on what it already learned. In other words, we will test the model using a completely
+new dataset.
 
 The dataset will be split 70% for training and 30% for testing.
 
@@ -484,22 +553,35 @@ test.classification.error <- round((pred.confusion.matrix[2, 1] + pred.confusion
                                      sum(pred.confusion.matrix) * 100, 2)
 ```
 
-The model report an error rate of `r classification.error`%, in other words
-`r classification.error`% of the classifications performed during training,
-were incorrect. More details about this can be found at the confusion matrix at
-the bottom of the table.
+The random forest model reports an error rate of `r classification.error`% during
+the training phase, in other words `r classification.error`% of the 
+classifications performed during training, were incorrect. More details about 
+this can be found at the confusion matrix at the bottom of the table.
 
-The testing dataset had a classification error of `r test.classification.error`%.
-This is the confusion matrix:
+After the training phase, we tested the model using the test dataset. The
+classification error obtained in this phase is `r test.classification.error`%.
+This is the confusion matrix for the test dataset:
 
 ```{r, echo=FALSE}                           
+#pred.confusion.matrix
+pred.confusion.matrix <- cbind(pred.confusion.matrix, 
+                               c(pred.confusion.matrix[1, 2] / 
+                                   (pred.confusion.matrix[1,1] + pred.confusion.matrix[1,2]), 
+                                 pred.confusion.matrix[2, 1] / 
+                                   (pred.confusion.matrix[2, 1] + pred.confusion.matrix[2, 2])))
+colnames(pred.confusion.matrix) <- c("lost", "won", "class.error")
 pred.confusion.matrix
 ```
 
 ##### Naive Bayes classifier
 
+We will use the same training and testing dataset with a different model, a naive
+Bayes classifier. This is the confusion matrix and classification error for
+this model.
+
+
 ```{r, echo=FALSE}
-#Create and train the model
+# Create and train the model
 bayes.classifier <- naiveBayes(result ~ ., data = train.data)
 train.data <- as.data.frame(cbind(class.1 = as.numeric(train.data$class.1), 
                                   class.2 = as.numeric(train.data$class.2),
@@ -508,11 +590,34 @@ train.data <- as.data.frame(cbind(class.1 = as.numeric(train.data$class.1),
                                   class.5 = as.numeric(train.data$class.5), 
                                   result = as.numeric(train.data$result)))
 pred <- predict(bayes.classifier, train.data)
-table(pred, train.data$result)
-bayes.classifier
 
-#Test the model
+# Create confusion matrix of the model
+bayes.training.confusion.matrix <- table(pred, train.data$result)
+bayes.training.confusion.matrix <- 
+  cbind(bayes.training.confusion.matrix, 
+        c(bayes.training.confusion.matrix[1, 2] /
+            (bayes.training.confusion.matrix[1, 1] + bayes.training.confusion.matrix[1, 2]),
+          bayes.training.confusion.matrix[2, 1] /
+            (bayes.training.confusion.matrix[2, 1] + bayes.training.confusion.matrix[2, 2])))                                       
+colnames(bayes.training.confusion.matrix) <- c("lost", "won", "class.error")
+bayes.training.confusion.matrix
 
+#Calculate the overall classification error
+bayes.training.classification.error <- round((bayes.training.confusion.matrix[2, 1] +
+                                                bayes.training.confusion.matrix[1, 2]) /
+                                           (bayes.training.confusion.matrix[1,1] +
+                                              bayes.training.confusion.matrix[1,2] +
+                                              bayes.training.confusion.matrix[2,1] +
+                                              bayes.training.confusion.matrix[2,2])
+                                         * 100, 2)
+                           
+```
+
+The naive Bayes model's classification error found during training is
+`r bayes.training.classification.error`%.
+
+```{r, echo=FALSE}
+# Apply the testing dataset on the model
 test.data <- as.data.frame(cbind(class.1 = as.numeric(test.data$class.1), 
                                  class.2 = as.numeric(test.data$class.2),
                                  class.3 = as.numeric(test.data$class.3), 
@@ -520,10 +625,62 @@ test.data <- as.data.frame(cbind(class.1 = as.numeric(test.data$class.1),
                                  class.5 = as.numeric(test.data$class.5), 
                                  result = as.numeric(test.data$result)))
 bayes.prediction <- predict(bayes.classifier, test.data)
-bayes.pred.confusion.matrix <- table(bayes.prediction, test.data$result)
 
-bayes.pred.confusion.matrix
+# Build the confusion matrix for the testing dataset
+bayes.test.confusion.matrix <- table(bayes.prediction, test.data$result)
+bayes.test.confusion.matrix <- 
+  cbind(bayes.test.confusion.matrix, 
+        c(bayes.test.confusion.matrix[1, 2] /
+            (bayes.test.confusion.matrix[1, 1] + bayes.test.confusion.matrix[1, 2]),
+          bayes.test.confusion.matrix[2, 1] /
+            (bayes.test.confusion.matrix[2, 1] + bayes.test.confusion.matrix[2, 2])))
+colnames(bayes.test.confusion.matrix) <- c("lost", "won", "class.error")
+bayes.test.confusion.matrix
+
+#Calculate the overall classification error
+bayes.test.classification.error <- round((bayes.test.confusion.matrix[2, 1] +
+                                                bayes.test.confusion.matrix[1, 2]) /
+                                           (bayes.test.confusion.matrix[1,1] +
+                                              bayes.test.confusion.matrix[1,2] +
+                                              bayes.test.confusion.matrix[2,1] +
+                                              bayes.test.confusion.matrix[2,2])
+                                         * 100, 2)
 ```
 
+The classification error reported for the testing set on the naive Bayes model is
+`r bayes.test.classification.error`%.
+
+##### Conclusion
+
+By looking at the classification errors from both models, we concluded that
+the random forest model performed better than the naive Bayes with a training
+classification error of `r classification.error`% and a testing classification
+error of `r test.classification.error`% in comparison to
+`r bayes.training.classification.error`% and `r bayes.test.classification.error`%.
+
+However, our answer to the question "is it possible to predict the outcome of a 
+match based on the structure of the team?", would be no. A classification error
+of around 50% means that the chance a team has of winning is of 50%, which is
+logical in this type of game since there are 2 teams in one match.
+
+To conclude, we would like to repeat that we had a very small data sample of just
+119 matches (238 teams), so with more data, the classification error could improve
+(or not).
+
+
+## Future work
+* More data! If ArenaNet releases an API with record of the matches, we would
+repeat this analysis using that data.
+* The data used for this analysis was from matches done in around four weeks.
+Since then, the metagame and more aspects the game (skills and traits), changes,
+so we could repeat this analysis in another period (probably after the release
+of the expansion Heart of Thorns).
+* Run the models used for prediction using another framework.
+
+## Notes and disclaimers
+* If you spot a typo, or any error in the analysis, feel free to notify me.
+* This work is licensed under a [Creative Commons Attribution-NonCommercial 4.0 International License](http://creativecommons.org/licenses/by-nc/4.0/). In other words, feel 
+free to use it, share it, edit it for non-commercial purposes and please, give credit.
+* ©2010–2015 ArenaNet, LLC. All rights reserved. Guild Wars, Guild Wars 2, Guild Wars 2: Heart of Thorns, ArenaNet and NCSOFT are trademarks or registered trademarks of NCSOFT Corporation. All other trademarks are the property of their respective owners.
 
 

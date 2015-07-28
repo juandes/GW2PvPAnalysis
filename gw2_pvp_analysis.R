@@ -141,3 +141,11 @@ team.result <- cbind(team.composition, team.composition.result)
 colnames(team.result)[6] <- "result"
 team.result$result[team.result$result == 0 ] <- "won"
 team.result$result[team.result$result == 1 ] <- "lost"
+team.result$result <- as.factor(team.result$result)
+
+index <- sample(2, nrow(team.result), replace=TRUE, prob=c(0.8, 0.2))
+train.data <- team.result[index == 1, ]
+test.data <- team.result[index == 2, ]
+rf <- randomForest(result ~ ., data = train.data, ntree = 90, proximity = TRUE)
+rf
+table(predict(rf), train.data$result)
