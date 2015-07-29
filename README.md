@@ -1,7 +1,6 @@
 # PvP in Guild Wars 2: A data analysis
 
 ## Overview
-***
 
 The game Guild Wars 2, release on 2012, introduces a player versus player (PvP)
 game mode called Conquest. In Conquest, there are two teams made of five players,
@@ -18,5 +17,5 @@ of the match and the composition of the teams.
 The analysis was done using R.
 
 ## Project
-***
+
 This repository contains the Markdown file that holds the analysis plus the R code, an R script with just the code, the original dataset used (in CSV), the final dataset (also in CSV), a codebook with some information about the datasets and the HTML version of the report.
