@@ -66,14 +66,14 @@ img {
 </div>
 
 
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
 <hr />
 <p>The game Guild Wars 2, release on 2012, introduces a player versus player (PvP) game mode called Conquest. In Conquest, there are two teams made of five players, and the main objective is to seize capture points to increase your team score (the more points you have, the faster the score increases); other ways to increase the score if by killing players of the opposing team, non-player characters (NPC) or by getting special bonuses.</p>
 <p>This work is a data analysis done on a dataset made of 119 Conquest matches. In the analysis we will take a look at several factors regarding a Conquest match, such as the map where the match was played, the final score of both teams, the result of the match and the composition of the teams.</p>
 </div>
-<div id="the-dataset" class="section level2">
-<h2>The dataset</h2>
+<div id="the-dataset" class="section level1">
+<h1>The dataset</h1>
 <hr />
 <p>As mentioned before, the dataset consists of 119 matches done during April and May 2015 and in the following table we will show the first five observations of the dataset.</p>
 <pre><code>##   map red.score blue.score winner red_1 red_2 red_3 red_4 red_5 blue_1
@@ -210,8 +210,10 @@ img {
 <p>The values represent the minimum, first quartile, median, third quartile and maximum.</p>
 </div>
 </div>
-<div id="composition-of-the-teams" class="section level2">
-<h2>Composition of the teams</h2>
+</div>
+<div id="composition-of-the-teams" class="section level1">
+<h1>Composition of the teams</h1>
+<hr />
 <p>The last part of this analysis is about the composition of the teams. Here, we studied the structure of the teams while answering several questions on the way. This section will follow a similar structure to the previous ones. We will start with a summary and then a detailed analysis about certain topics. Besides this, this section introduces several machine learning algorithms that will be used to try to predict the outcome of the matches based on the composition of the team and the map where the match was played.</p>
 <p>As mentioned before, our dataset is made of 119 matches. For this reason, there are 238 observations of team composition.</p>
 <div id="summary-of-team-composition" class="section level3">
@@ -310,9 +312,9 @@ img {
 </div>
 </div>
 </div>
-</div>
 <div id="future-work" class="section level2">
 <h2>Future work</h2>
+<hr />
 <ul>
 <li>More data! If ArenaNet releases an API with record of the matches, we would repeat this analysis using that data.</li>
 <li>The data used for this analysis was from matches done in around four weeks. Since then, the metagame and more aspects the game (skills and traits), changes, so we could repeat this analysis in another period (probably after the release of the expansion Heart of Thorns).</li>
@@ -321,6 +323,7 @@ img {
 </div>
 <div id="notes-and-disclaimers" class="section level2">
 <h2>Notes and disclaimers</h2>
+<hr />
 <ul>
 <li>If you spot a typo, or any error in the analysis, feel free to notify me.</li>
 <li>This work is licensed under a <a href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>. In other words, feel free to use it, share it, edit it for non-commercial purposes and please, give credit.</li>
