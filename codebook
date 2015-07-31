@@ -1,19 +1,28 @@
 Codebook
-winner -> 0 if red team wins, 1 if blue team wins.
 
-Professions  
-No player	0
-Elementalist	1
-Engineer	2
-Guardian	3
-Mesmer	4
-Necromancer	5
-Ranger	6
-Thief	7
-Warrior	8
+- On the original dataset and the df data frame that you will find in R,
+there is a column named winner. If the value of the column is  0, that 
+means the red team won the match, otherwise, if winner = 1, then the blue
+team won the match.
+winner -> 0 if red team wins, 
+winner -> 1 if blue team wins.
 
-Maps  
-Battle of Kyhlo	1
-Forest of Niflhel	2
-Legacy of the Foefire	3
-Temple of the Silent Storm	4
+- Professions: Once the original dataset is loaded into R, the professions
+are mapped to some integers. These are the values: 
+ 
+No player -> 0
+Elementalist -> 1
+Engineer ->	2
+Guardian ->	3
+Mesmer -> 4
+Necromancer -> 5
+Ranger -> 6
+Thief -> 7
+Warrior	-> 8
+
+- Maps: The maps are also mapped to integers:
+
+Battle of Kyhlo	-> 1
+Forest of Niflhel -> 2
+Legacy of the Foefire -> 3
+Temple of the Silent Storm -> 4
