@@ -243,11 +243,47 @@ img {
 <div id="is-there-a-repeated-team-composition" class="section level4">
 <h4>Is there a repeated team composition?</h4>
 <p>In this question we looked for those team compositions that appears more than once.</p>
-<pre><code>##         class.1      class.2 class.3     class.4      class.5 Frequency
-## 103 Necromancer      Warrior  Ranger Necromancer       Ranger         2
-## 110      Ranger Elementalist   Thief       Thief      Warrior         2
-## 156      Ranger       Ranger   Thief    Guardian Elementalist         2</code></pre>
-<p>As the table shows, there were three team configurations that were repeated more than once.</p>
+<pre><code>##         class.1     class.2     class.3     class.4 class.5 Frequency
+## 1  Elementalist    Guardian      Ranger      Ranger Warrior         8
+## 2  Elementalist    Guardian      Ranger       Thief Warrior         6
+## 3  Elementalist      Mesmer      Ranger      Ranger   Thief         6
+## 4      Guardian      Mesmer      Ranger       Thief Warrior         5
+## 5  Elementalist    Guardian Necromancer      Ranger   Thief         3
+## 6  Elementalist    Guardian      Ranger      Ranger   Thief         3
+## 7  Elementalist      Ranger      Ranger       Thief Warrior         3
+## 8  Elementalist      Ranger       Thief       Thief Warrior         3
+## 9      Engineer    Engineer    Guardian Necromancer  Ranger         3
+## 10     Guardian      Mesmer      Ranger       Thief   Thief         3
+## 11     Guardian      Ranger      Ranger       Thief Warrior         3
+## 12       Ranger      Ranger       Thief       Thief Warrior         3
+## 13 Elementalist    Engineer    Guardian Necromancer Warrior         2
+## 14 Elementalist    Guardian    Guardian Necromancer  Ranger         2
+## 15 Elementalist    Guardian    Guardian      Ranger   Thief         2
+## 16 Elementalist    Guardian    Guardian      Ranger Warrior         2
+## 17 Elementalist    Guardian      Mesmer      Ranger  Ranger         2
+## 18 Elementalist    Guardian      Mesmer      Ranger   Thief         2
+## 19 Elementalist    Guardian Necromancer       Thief   Thief         2
+## 20 Elementalist      Mesmer      Mesmer Necromancer  Ranger         2
+## 21 Elementalist      Mesmer Necromancer      Ranger Warrior         2
+## 22 Elementalist      Mesmer      Ranger      Ranger Warrior         2
+## 23     Engineer    Guardian      Mesmer      Ranger Warrior         2
+## 24     Engineer    Guardian      Ranger      Ranger   Thief         2
+## 25     Engineer    Guardian      Ranger       Thief Warrior         2
+## 26     Engineer      Ranger      Ranger       Thief Warrior         2
+## 27     Guardian    Guardian      Mesmer      Ranger   Thief         2
+## 28     Guardian    Guardian      Mesmer      Ranger Warrior         2
+## 29     Guardian    Guardian      Ranger      Ranger   Thief         2
+## 30     Guardian      Mesmer Necromancer      Ranger  Ranger         2
+## 31     Guardian      Mesmer Necromancer      Ranger Warrior         2
+## 32     Guardian      Mesmer      Ranger      Ranger   Thief         2
+## 33       Mesmer      Mesmer Necromancer      Ranger   Thief         2
+## 34       Mesmer      Mesmer      Ranger      Ranger   Thief         2
+## 35       Mesmer Necromancer      Ranger      Ranger  Ranger         2
+## 36       Mesmer Necromancer      Ranger       Thief Warrior         2
+## 37       Mesmer      Ranger      Ranger       Thief Warrior         2
+## 38  Necromancer Necromancer      Ranger      Ranger Warrior         2
+## 39  Necromancer      Ranger      Ranger       Thief Warrior         2</code></pre>
+<p>As the table shows, there were 39 team configurations that were repeated more. than once.</p>
 </div>
 <div id="what-is-the-outcome-of-the-match-when-a-team-is-made-of-3-or-more-of-the-same-profession" class="section level4">
 <h4>What is the outcome of the match when a team is made of 3 or more of the same profession?</h4>
