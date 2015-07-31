@@ -1,6 +1,6 @@
 ---
 title: "Guild Wars 2 PvP Data Analysis"
-author: "Juan De Dios Santos, @jdiossantos"
+author: "Juande"
 output: html_document
 ---
 
@@ -27,13 +27,13 @@ df$X.1 <- NULL
 df$X.2 <- NULL
 
 #Rename columns
-colnames(df) <- c("map", "red.score", "blue_score", "winner", "red_1", "red_2", 
+colnames(df) <- c("map", "red.score", "blue.score", "winner", "red_1", "red_2", 
                   "red_3", "red_4", "red_5", "blue_1", "blue_2", "blue_3", "blue_4",
                   "blue_5")
 
 #If the red team won, the value is 0, otherwise 1
-df$winner[df$red.score > df$blue_score] <- 0
-df$winner[df$red.score < df$blue_score] <- 1
+df$winner[df$red.score > df$blue.score] <- 0
+df$winner[df$red.score < df$blue.score] <- 1
 
 #Change the names of the classes for numbers
 df[5:14][df[5:14] == "ele"] <- 1
@@ -46,9 +46,8 @@ df[5:14][df[5:14] == "t"] <- 7
 df[5:14][df[5:14] == "war"] <- 8
 ```
 
-## Introduction
-
-------
+# Introduction
+***
 
 The game Guild Wars 2, release on 2012, introduces a player versus player (PvP)
 game mode called Conquest. In Conquest, there are two teams made of five players,
@@ -62,9 +61,8 @@ the analysis we will take a look at several factors regarding a Conquest match,
 such as the map where the match was played, the final score of both teams, the result
 of the match and the composition of the teams.
 
-## The dataset
-
-------
+# The dataset
+***
 
 As mentioned before, the dataset consists of 119 matches done during April and
 May 2015 and in the following table we will show the first five observations
@@ -118,7 +116,7 @@ qplot(map, data = df, geom = "histogram", main = "Histogram of map usage", xlab 
 
 As seen by both the table and plot, the most selected map was Forest of Niflhel,
 with a percentage of `r map.frequency.percentage.table[2, 3]`% and the least selected,
-was Temple of the Silent Storm with `r map.frequency.percentage.table[4, 3]`%.
+was Battle of Kyhlo with `r map.frequency.percentage.table[1, 3]`%.
 
 ##Score and result of the matches
 ***
@@ -175,7 +173,7 @@ wins.per.map.percentage
 Next, we will discuss the gap between the final scores of the matches.
 
 ```{r, echo=FALSE}
-df$score.difference <- abs(df$red.score - df$blue_score)
+df$score.difference <- abs(df$red.score - df$blue.score)
 score.difference.summary <- summary(df$score.difference)
 score.difference.summary
 ```
@@ -239,7 +237,7 @@ lines(density(df$score.difference), col="blue", lwd = 2)
 lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen", lwd = 2)
 ```
 
-
+### Wins per map
 
 Now we will present four visualizations. The first one presents the frequency of
 victories of both teams across all the maps, the following two present the scores
@@ -248,48 +246,62 @@ both teams.
 
 
 ```{r,echo=FALSE}
-winners_and_score <- melt(wins.per.map, id="map")
+winners_and_score <- melt(wins.per.map, id = "map")
 colnames(winners_and_score) <- c("Map", "Team", "Frequency")
-ggplot(data=winners_and_score, aes(x=Team, y=Frequency, fill=Team))+
-  geom_bar(stat="identity") +
-  facet_wrap(~Map) +
-  ggtitle("Scores of both teams per map")
+ggplot(data=winners_and_score, aes(x = Team, y = Frequency, fill = Team)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ Map) +
+  ggtitle("Wins of both teams per map")
 ```
 
 ```{r, echo=FALSE}
-scoresdf <- data.frame(match_number = seq(1,119), red.score = df$red.score, blue_score = df$blue_score, map = df$map)
-qplot(match_number, red.score, data = scoresdf, size = red.score, alpha = red.score, colour = "red") + theme(legend.position = "none")
-qplot(match_number, blue_score, data = scoresdf, size = blue_score, alpha = blue_score, colour = blue_score) + theme(legend.position = "none")
+scoresdf <- data.frame(match_number = seq(1,119), red.score = df$red.score, 
+                       blue.score = df$blue.score, map = df$map)
+
+qplot(match_number, red.score, data = scoresdf, size = red.score, 
+      alpha = red.score, colour = "red", main = "Red team's score",
+      xlab = "Match number", ylab = "Score") + theme(legend.position = "none") 
+
+qplot(match_number, blue.score, data = scoresdf, size = blue.score, 
+      alpha = blue.score, colour = blue.score, main = "Blue team's score",
+      xlab = "Match number", ylab = "Score") + theme(legend.position = "none")
 ```
 
 ```{r, echo=FALSE}
-qplot(x = df$red.score, y = df$blue_score, geom = "point", alpha = I(0.5), size = I(5))
+qplot(x = df$red.score, y = df$blue.score, geom = "point", alpha = I(0.5),
+      size = I(5), main = "Final score of every match", xlab = "Red score",
+      ylab = "Blue score")
 ```
 
 The previous scatterplot shows the relation between the final scores of both teams.
-Those points on the upper left corner and bottom right are matches where one of
-the teams won by a great difference. If we perform a correlation test on these values,
-we obtained a correlation of `r cor(df$red.score, df$blue_score)`, which means
+The points on the upper left corner and bottom right represent the matches where 
+one of the teams won by a great difference.
+
+A correlation test was done on these values and the result was  
+`r cor(df$red.score, df$blue.score)`, which means
 that there is some kind of (negative) correlation on the data. To further confirm
-this, we calculated the p-value (found after this) which by being so small implies
-there is a strong evidence against the null hypothesis, which is that the correlation
-is 0 (no relation between both scores).
+this, we calculated the p-value (found after this), which by being so small implies
+that there is a strong evidence against the null hypothesis (the null hypothesis
+is that the correlation is 0).
 
 This table presents correlation, p-value and other statistics.
+
 ```{r, echo=FALSE}
-cor.test(df$red.score, df$blue_score)
+cor.test(df$red.score, df$blue.score)
 ```
 
-The next topic to discuss are the scores of the matches. Here, we will take a look at how distributed these scores are and we will show some statistics about them accompanied by several plots. 
+The next topic to discuss is the scores of the matches. Here, we will take a look at how these scores are distributed and show some statistics about them, accompanied by several plots.
 
-###Final scores of the winning team
-In this section we will take a look at a summary of the final scores of the winners of all the 
-119 matches recorded in this dataset. Before continuining, we would like to mention
-that a PvP match in Guild Wars 2 ends when one of the both teams reach a score 
+### Final scores of the winning team
+
+In this section we will take a look at the final scores of the winners of all the 
+119 matches recorded in this dataset. Before continuing, we would like to mention
+that a PvP match in Guild Wars 2 ends when one of the teams reaches a score 
 greater or equal to 500.
 
 ```{r, echo=FALSE}
-winner.score <- pmax(df$red.score, df$blue_score)
+# Create a vector with the winner score of each match
+winner.score <- pmax(df$red.score, df$blue.score)
 summary(winner.score)
 ```
 
@@ -301,12 +313,14 @@ gives 150 points to a team.
 
 ###Losers score
 
-Unlike the winner's score, the final score of the loser team could be anything from 0 (if you are really bad) up to 499 (in most cases).
+Unlike the winner's score, the final score of the loser team could be anything 
+from 0 (if you are really bad) up to 499 (in most cases).
 
 The following list shows the scores of the loser's team.
 
-```{r}
-loser_score <- pmin(df$red.score, df$blue_score)
+```{r, echo=FALSE}
+# Create a vector with the score of the defeated team from each match
+loser_score <- pmin(df$red.score, df$blue.score)
 loser_score
 ```
 
@@ -314,29 +328,44 @@ The scores are more varied that the winner scores.
 
 The next table shows a summary of this scores, followed by the standard deviation.
 
-```{r}
+```{r, echo=FALSE}
 summary(loser_score)
 print(sd(loser_score))
 ```
 
-The summary table shows that during one game, the team who lost, just obtained 10 points (ouch!), making this the minimum value across the whole dataset, while the average was 328.2 and the max was 491 (so close to winning). We also calculated the standard deviation, which is `r print(sd(loser_score))`, a value greater than the standard deviation of the winner's score, which was `r print(sd(winner.score))`. The following two figures shows these results via a histogram (that includes a density line) and a boxplot.
+The summary table shows that during one game, the team who lost, just obtained 
+10 points (ouch!), making this the minimum value across the whole dataset, while 
+the average was 328.2 points and the max was 491 (so close to winning). We also
+calculated the standard deviation, which is `r print(sd(loser_score))`, a value 
+greater than the standard deviation of the winner's score, which was 
+`r print(sd(winner.score))`. The following two figures shows these results via 
+a histogram (that includes a density line) and a boxplot.
 
-```{r}
-hist(loser_score, prob=TRUE, col="grey")# prob=TRUE for probabilities not counts
+```{r, echo=FALSE}
+hist(loser_score, prob=TRUE, col = "grey")
 rug(loser_score)
-lines(density(loser_score), col="blue", lwd=2) # add a density estimate with defaults
-lines(density(loser_score, adjust=2), lty="dotted", col="darkgreen", lwd=2) #smoother
-#Hacer esto mismo por map
+lines(density(loser_score), col = "blue", lwd=2)
+lines(density(loser_score, adjust=2), lty = "dotted", col = "darkgreen", lwd = 2)
 ```
 
-The histogram shows that the score of the defeated team during most matches was in the range of 350 to 400 and that there were a few games where the score of the defeated team was less than 100.
+The histogram shows that the score of the defeated team during most matches was 
+in the range of 350 to 400 and that there were a few games where the score of t
+he defeated team was less than 100.
 
 ```{r, echo=FALSE}
 boxplot(loser_score, main = "Scores of the defeated team", ylab = "Score")
 boxplot.stats(loser_score)$out
 ```
 
-The previous figure, a boxplot, shows the distribution of the scores. The box goes from the first quartile (Q1), which is `r boxplot.stats(loser_score)$stats[2]`  to the third quartile (Q3), `r boxplot.stats(loser_score)$stats[4]`. The line in the middle shows the median, which is `r boxplot.stats(loser_score)$stats[3]` and the top and lower whiskers shows the maximum value (excluding the outliers), which is `r boxplot.stats(loser_score)$stats[5]` and the minimum value (also excluding the outliers), which for this dataset is `r boxplot.stats(loser_score)$stats[1]`. The two dots at the bottom of the plot are the outliers. The values of these two values are 10 and 13.
+The previous figure, a boxplot, shows the distribution of the scores. The box 
+goes from the first quartile (Q1), which is `r boxplot.stats(loser_score)$stats[2]`
+to the third quartile (Q3), `r boxplot.stats(loser_score)$stats[4]`. The line 
+in the middle shows the median, which is `r boxplot.stats(loser_score)$stats[3]` 
+and the top and lower whiskers shows the maximum value (excluding the outliers),
+which is `r boxplot.stats(loser_score)$stats[5]` and the minimum value (also 
+excluding the outliers), which for this dataset is `r boxplot.stats(loser_score)$stats[1]`. 
+The two dots at the bottom of the plot are the outliers. The values of these two
+outliers are 10 and 13 points.
 
 The next table shows a summary of the boxplot.
 
@@ -347,30 +376,31 @@ boxplot.stats(loser_score)$stats
 The values represent the minimum, first quartile, median, third quartile and 
 maximum.
 
-## Composition of the teams
+# Composition of the teams
+***
 
 The last part of this analysis is about the composition of the teams. Here, we
-will study the structure of the teams while answering several questions on the way.
+studied the structure of the teams while answering several questions on the way.
 This section will follow a similar structure to the previous ones. We will start 
 with a summary and then a detailed analysis about certain topics. Besides this, 
 this section introduces several machine learning algorithms that will be used to 
 try to predict the outcome of the matches based on the composition of the team 
 and the map where the match was played.
 
-As mentioned before, our dataset is made of 119 matches. For this reason, we
-actually have 238 observations of team composition (because there are two teams
-per match).
+As mentioned before, our dataset is made of 119 matches. For this reason, there
+are 238 observations of team composition.
 
 ### Summary of team composition
 
 This section will start with a summary of the structure of the teams. We will
 present the composition of the teams in terms of professions or classes. In
-addition to this, we will be showing the amount of teams that were incomplete.
+addition to this, we will show how many teams were incomplete.
 
-The first question we will answer is: What is the frequency and percentage of 
+The first question we will answer is: What is the frequency and percentage of each 
 professions across the dataset?
 
 ```{r, echo=FALSE}
+# Create a dataset with all the different teams
 team.composition <- data.frame(class.1 = numeric(0), class.2 = numeric(0), 
                                class.3 = numeric(0), class.4 = numeric(0), 
                                class.5 = numeric(0))
@@ -384,21 +414,22 @@ team.composition <- rbind(team.composition, red.team.composition, blue.team.comp
 ```
 
 
-#### What is the frequency and percentage of professions across the dataset?
+#### What is the frequency and percentage of each professions across the dataset?
 
 ```{r, echo=FALSE}
 frequency.percentage.classes <- sapply(1:8, function(class.number) 
   sum(sapply(team.composition, function(x) sum(x == class.number))))
 frequency.percentage.classes <- as.data.frame(frequency.percentage.classes)
 rownames(frequency.percentage.classes) <- c("Elementalist", "Engineer", "Guardian", "Mesmer",
-                                 "Necromancer", "Ranger", "Thief", "Warrior")
+                                            "Necromancer", "Ranger", "Thief", "Warrior")
 colnames(frequency.percentage.classes) <- c("Frequency")
-frequency.percentage.classes$Percentage <- round(frequency.percentage.classes$Frequency/(sum(frequency.percentage.classes$Frequency) + 17) * 100, 2) # 17 missing players.
+frequency.percentage.classes$Percentage <- 
+  round(frequency.percentage.classes$Frequency / (sum(frequency.percentage.classes$Frequency) + 17) * 100, 2)  # 17 missing players
 frequency.percentage.classes
 ```
 
 We can see that the most common class across the matches was the Ranger, with a
-frequency of 299 (25.12%), however, the reason why this number much larger than
+frequency of 299 (25.13%), however, the reason why this number much larger than
 the other frequencies is the fact that all the matches we did was using a Ranger,
 so every single match had at least one Ranger. On the other end, there is the
 Engineer, with a frequency of 70 (5.88%).
@@ -427,19 +458,30 @@ or if they disconnected.
 In this question we looked for those team compositions that appears more than once.
 
 ```{r, echo=FALSE}
-frequent.teams <- ddply(team.composition,names(team.composition),summarize, 
+team.composition.reorder <- data.frame(class.1 = numeric(0), class.2 = numeric(0), 
+                               class.3 = numeric(0), class.4 = numeric(0), 
+                               class.5 = numeric(0))
+team.composition.reorder <- as.data.frame(t(apply(team.composition, 1 , sort)),
+                                          stringsAsFactors = FALSE)
+colnames(team.composition.reorder) <- colnames(team.composition)
+frequent.teams <- ddply(team.composition.reorder ,names(team.composition.reorder), summarize, 
                         Frequency = length(class.1))
+
 frequent.teams <- frequent.teams[frequent.teams$Frequency > 1,]
-frequent.teams[1:5][frequent.teams[1:5] == 5] <- "Necromancer"
-frequent.teams[1:5][frequent.teams[1:5] == 8] <- "Warrior"
-frequent.teams[1:5][frequent.teams[1:5] == 6] <- "Ranger"
 frequent.teams[1:5][frequent.teams[1:5] == 1] <- "Elementalist"
-frequent.teams[1:5][frequent.teams[1:5] == 7] <- "Thief"
+frequent.teams[1:5][frequent.teams[1:5] == 2] <- "Engineer"
 frequent.teams[1:5][frequent.teams[1:5] == 3] <- "Guardian"
-frequent.teams
+frequent.teams[1:5][frequent.teams[1:5] == 4] <- "Mesmer"
+frequent.teams[1:5][frequent.teams[1:5] == 5] <- "Necromancer"
+frequent.teams[1:5][frequent.teams[1:5] == 6] <- "Ranger"
+frequent.teams[1:5][frequent.teams[1:5] == 7] <- "Thief"
+frequent.teams[1:5][frequent.teams[1:5] == 8] <- "Warrior"
+
+arrange(frequent.teams, desc(Frequency))
 ```
 
-As the table shows, there were three team configurations that were repeated more
+As the table shows, there were `r nrow(frequent.teams)` team configurations that
+were repeated more.
 than once.
 
 #### What is the outcome of the match when a team is made of 3 or more of the same profession?
@@ -448,9 +490,7 @@ than once.
 # Find matches that had at least 3 of the same professions
 three.or.more <- team.composition[apply(team.composition, 1, function(X) any(table(X) >= 3)),]
 
-
-
-scores.for.red <- df$winner # 1 means red lose, 0 means red won (0 means victory, 1 defeat)
+scores.for.red <- df$winner  # 1 means red lose, 0 means red won (0 means victory, 1 defeat)
 scores.for.blue <- sapply(df$winner, function(x) if (x == 1) { 0 } else { 1 })
 scores.for.red <- as.data.frame(scores.for.red)
 scores.for.blue <- as.data.frame(scores.for.blue)
@@ -458,22 +498,10 @@ colnames(scores.for.red) <- c("Result")
 colnames(scores.for.blue) <- c("Result")
 team.composition.result <- data.frame(result = numeric(0))
 team.composition.result <- rbind(team.composition.result, scores.for.red, scores.for.blue)
-# Get the result of the matches. We are using df[4] twice because of the structure
-# of team.composition dataframe
-#team.composition.result <- data.frame(result = numeric(0))
-#team.composition.result <- rbind(team.composition.result, df[4], df[4])
 
 # Get the result of the particular matches using the indexes of three.or.more
 three.or.more <- cbind(three.or.more, 
                        result = team.composition.result[as.numeric(rownames(three.or.more)),])
-#three.or.more.result <- team.composition.result[as.numeric(rownames(three.or.more)),]
-#three.or.more.teams <- c(rep.int(0, 119), rep.int(1, 119))
-#three.or.more.teams <- data.frame(team = numeric(nrow(team.composition)))
-#three.or.more.teams$team[120: nrow(three.or.more.teams)] <- 1
-#three.or.more.teams$team <- rbind(three.or.more.teams, rep(1,100))
-#three.or.more.teams <- c(rep.int(0, 119), rep.int(1, 119))
-#three.or.more <- cbind(three.or.more, 
-                       #team = three.or.more.teams[as.numeric(rownames(three.or.more)),])
 
 ```
 
@@ -506,16 +534,18 @@ team.result$result[team.result$result == 0 ] <- "won"
 team.result$result[team.result$result == 1 ] <- "lost"
 team.result$result <- as.factor(team.result$result)
 ```
-The last section of this analysis, introduces two classification models, naive
-Bayes classifier and random forest, that will learn from our data with the purpose
-of classifying the outcome of a match based on the composition of the team. The
-two possible outcome are victory or defeat.
+
+The last section of this analysis introduces two classification models, naive
+Bayes classifier and random forest. These two models will learn from our data 
+with the purpose of classifying the outcome of a match in either 'victory' or 
+'defeat', based on the composition of the team.
 
 The basic idea behind these classifiers could be divided in two parts. During
 the first part, often called the training part, the model is feeded with data that
-already have the outcome of the match. In other words, we are teaching the model.
-The table below, shows an example of this. It has the structure of the team
-(3 rangers, presented with the number 6 and two quitters, presented as 0), and
+already have the outcome of the match. In other words, we are training the model.
+The table below shows an example of an observation that will be used for training
+the model. This observation have the five members of the team (3 rangers, 
+presented with the number 6 and two quitters, presented as 0), and
 the result, which is 'lost'.
 
 ```{r, echo=FALSE}
@@ -535,6 +565,7 @@ The following table is a direct output that has information about the model and
 the results.
 
 ```{r, echo=FALSE}
+# Create the train and test dataset
 index <- sample(2, nrow(team.result), replace=TRUE, prob=c(0.8, 0.2))
 train.data <- team.result[index == 1, ]
 test.data <- team.result[index == 2, ]
@@ -669,6 +700,8 @@ To conclude, we would like to repeat that we had a very small data sample of jus
 
 
 ## Future work
+***
+
 * More data! If ArenaNet releases an API with record of the matches, we would
 repeat this analysis using that data.
 * The data used for this analysis was from matches done in around four weeks.
@@ -678,6 +711,8 @@ of the expansion Heart of Thorns).
 * Run the models used for prediction using another framework.
 
 ## Notes and disclaimers
+***
+
 * If you spot a typo, or any error in the analysis, feel free to notify me.
 * This work is licensed under a [Creative Commons Attribution-NonCommercial 4.0 International License](http://creativecommons.org/licenses/by-nc/4.0/). In other words, feel 
 free to use it, share it, edit it for non-commercial purposes and please, give credit.
