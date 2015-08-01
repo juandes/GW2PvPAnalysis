@@ -566,7 +566,7 @@ the results.
 
 ```{r, echo=FALSE}
 # Create the train and test dataset
-index <- sample(2, nrow(team.result), replace=TRUE, prob=c(0.8, 0.2))
+index <- sample(2, nrow(team.result), replace=TRUE, prob=c(0.7, 0.3))
 train.data <- team.result[index == 1, ]
 test.data <- team.result[index == 2, ]
 
