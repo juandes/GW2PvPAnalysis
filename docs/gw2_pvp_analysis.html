@@ -317,32 +317,32 @@ img {
 ##                      Number of trees: 70
 ## No. of variables tried at each split: 2
 ## 
-##         OOB estimate of  error rate: 47.83%
+##         OOB estimate of  error rate: 51.85%
 ## Confusion matrix:
 ##      lost won class.error
-## lost   48  47   0.4947368
-## won    41  48   0.4606742</code></pre>
-<p>The random forest model reports an error rate of 47.83% during the training phase, in other words 47.83% of the classifications performed during training, were incorrect. More details about this can be found at the confusion matrix at the bottom of the table.</p>
-<p>After the training phase, we tested the model using the test dataset. The classification error obtained in this phase is 50%. This is the confusion matrix for the test dataset:</p>
+## lost   43  42   0.4941176
+## won    42  35   0.5454545</code></pre>
+<p>The random forest model reports an error rate of 51.85% during the training phase, in other words 51.85% of the classifications performed during training, were incorrect. More details about this can be found at the confusion matrix at the bottom of the table.</p>
+<p>After the training phase, we tested the model using the test dataset. The classification error obtained in this phase is 52.63%. This is the confusion matrix for the test dataset:</p>
 <pre><code>##      lost won class.error
-## lost   15  18   0.5454545
-## won     9  12   0.4285714</code></pre>
+## lost   20  26   0.5652174
+## won    14  16   0.4666667</code></pre>
 </div>
 <div id="naive-bayes-classifier" class="section level5">
 <h5>Naive Bayes classifier</h5>
 <p>We will use the same training and testing dataset with a different model, a naive Bayes classifier. This is the confusion matrix and classification error for this model.</p>
 <pre><code>##      lost won class.error
-## lost   47  60   0.5607477
-## won    48  29   0.6233766</code></pre>
-<p>The naive Bayes model’s classification error found during training is 58.7%.</p>
+## lost   46  49   0.5157895
+## won    39  28   0.5820896</code></pre>
+<p>The naive Bayes model’s classification error found during training is 54.32%.</p>
 <pre><code>##      lost won class.error
-## lost   11  21   0.6562500
-## won    13   9   0.5909091</code></pre>
-<p>The classification error reported for the testing set on the naive Bayes model is 62.96%.</p>
+## lost   16  26   0.6190476
+## won    18  16   0.5294118</code></pre>
+<p>The classification error reported for the testing set on the naive Bayes model is 57.89%.</p>
 </div>
 <div id="conclusion" class="section level5">
 <h5>Conclusion</h5>
-<p>By looking at the classification errors from both models, we concluded that the random forest model performed better than the naive Bayes with a training classification error of 47.83% and a testing classification error of 50% in comparison to 58.7% and 62.96%.</p>
+<p>By looking at the classification errors from both models, we concluded that the random forest model performed better than the naive Bayes with a training classification error of 51.85% and a testing classification error of 52.63% in comparison to 54.32% and 57.89%.</p>
 <p>However, our answer to the question “is it possible to predict the outcome of a match based on the structure of the team?”, would be no. A classification error of around 50% means that the chance a team has of winning is of 50%, which is logical in this type of game since there are 2 teams in one match.</p>
 <p>To conclude, we would like to repeat that we had a very small data sample of just 119 matches (238 teams), so with more data, the classification error could improve (or not).</p>
 </div>
