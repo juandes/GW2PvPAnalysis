@@ -1,6 +1,6 @@
 ---
 title: "Guild Wars 2 PvP Data Analysis"
-author: "Juande"
+author: "Juan De Dios Santos, @[jdiossantos](https://twitter.com/jdiossantos)"
 output: html_document
 ---
 
@@ -557,7 +557,7 @@ team compositions to the model and it will output the outcome of the match based
 on what it already learned. In other words, we will test the model using a completely
 new dataset.
 
-The dataset will be split 70% for training and 30% for testing.
+The dataset was split 70% for training and 30% for testing.
 
 ##### Random Forest
 
@@ -633,7 +633,7 @@ bayes.training.confusion.matrix <-
 colnames(bayes.training.confusion.matrix) <- c("lost", "won", "class.error")
 bayes.training.confusion.matrix
 
-#Calculate the overall classification error
+# Calculate the overall classification error
 bayes.training.classification.error <- round((bayes.training.confusion.matrix[2, 1] +
                                                 bayes.training.confusion.matrix[1, 2]) /
                                            (bayes.training.confusion.matrix[1,1] +
