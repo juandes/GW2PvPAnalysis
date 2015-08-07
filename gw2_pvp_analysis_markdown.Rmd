@@ -159,10 +159,10 @@ wins.per.map <- data.frame(map = c("Battle of Kyhlo","Forest of Niflhel",
                            stringsAsFactors=FALSE)
                                 
 wins.per.map.percentage <- wins.per.map
-wins.per.map.percentage$red.team.win.percent <- round(wins.per.map$red.team / (wins.per.map$red.team +
-                                                                         wins.per.map$blue.team)*100, 2)
-wins.per.map.percentage$blue.team.win.percent <- round(wins.per.map$blue.team / (wins.per.map$red.team +
-                                                                           wins.per.map$blue.team)*100, 2)
+wins.per.map.percentage$red.team.win.percent <-
+  round(wins.per.map$red.team / (wins.per.map$red.team + wins.per.map$blue.team)*100, 2)
+wins.per.map.percentage$blue.team.win.percent <-
+  round(wins.per.map$blue.team / (wins.per.map$red.team + wins.per.map$blue.team)*100, 2)
 colnames(wins.per.map.percentage) <- c("Map", "Red team victories", "Blue team victories",
                                        "Red team win %", "Blue team win %")
 wins.per.map.percentage
@@ -199,7 +199,8 @@ lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen",
 
 ```{r, echo=FALSE}
 hist(filter(df, map == 1)$score.difference, prob = TRUE,
-     main = "Gap between final scores (Battle of Kyhlo)", xlab = "Score difference")
+     main = "Gap between final scores (Battle of Kyhlo)",
+     xlab = "Score difference")
 rug(filter(df, map == 1)$score.difference)
 lines(density(df$score.difference), col="blue", lwd = 2)
 lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen", 
@@ -210,7 +211,8 @@ lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen",
 
 ```{r, echo=FALSE}
 hist(filter(df, map == 2)$score.difference, prob = TRUE,
-     main = "Gap between final scores (Forest of Niflhel)", xlab = "Score difference")
+     main = "Gap between final scores (Forest of Niflhel)", 
+     xlab = "Score difference")
 rug(filter(df, map == 2)$score.difference)
 lines(density(df$score.difference), col="blue", lwd = 2)
 lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen",
@@ -221,20 +223,24 @@ lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen",
 
 ```{r, echo=FALSE}
 hist(filter(df, map == 3)$score.difference, prob = TRUE,
-     main = "Gap between final scores (Legacy of the Foefire)", xlab = "Score difference")
+     main = "Gap between final scores (Legacy of the Foefire)", 
+     xlab = "Score difference")
 rug(filter(df, map == 3)$score.difference)
 lines(density(df$score.difference), col="blue", lwd = 2)
-lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen", lwd = 2)
+lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen",
+      lwd = 2)
 ```
 
 #### Temple of the Silent Storm
 
 ```{r, echo=FALSE}
 hist(filter(df, map == 4)$score.difference, prob = TRUE,
-     main = "Gap between final scores (Temple of the Silent Storm)", xlab = "Score difference")
+     main = "Gap between final scores (Temple of the Silent Storm)", 
+     xlab = "Score difference")
 rug(filter(df, map == 4)$score.difference)
 lines(density(df$score.difference), col="blue", lwd = 2)
-lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen", lwd = 2)
+lines(density(df$score.difference, adjust = 2), lty="dotted", col="darkgreen",
+      lwd = 2)
 ```
 
 ### Wins per map
@@ -420,11 +426,14 @@ team.composition <- rbind(team.composition, red.team.composition, blue.team.comp
 frequency.percentage.classes <- sapply(1:8, function(class.number) 
   sum(sapply(team.composition, function(x) sum(x == class.number))))
 frequency.percentage.classes <- as.data.frame(frequency.percentage.classes)
-rownames(frequency.percentage.classes) <- c("Elementalist", "Engineer", "Guardian", "Mesmer",
-                                            "Necromancer", "Ranger", "Thief", "Warrior")
+rownames(frequency.percentage.classes) <- c("Elementalist", "Engineer",
+                                            "Guardian", "Mesmer",
+                                            "Necromancer", "Ranger",
+                                            "Thief", "Warrior")
 colnames(frequency.percentage.classes) <- c("Frequency")
 frequency.percentage.classes$Percentage <- 
-  round(frequency.percentage.classes$Frequency / (sum(frequency.percentage.classes$Frequency) + 17) * 100, 2)  # 17 missing players
+  round(frequency.percentage.classes$Frequency / 
+          (sum(frequency.percentage.classes$Frequency) + 17) * 100, 2)  # 17 missing players
 frequency.percentage.classes
 ```
 
@@ -445,13 +454,20 @@ frequency.percentage.missing.players <- sum(sapply(team.composition, function(x)
 frequency.percentage.missing.players <- as.data.frame(frequency.percentage.missing.players)
 rownames(frequency.percentage.missing.players) <- c("Missing players")
 colnames(frequency.percentage.missing.players) <- c("Frequency")
-frequency.percentage.missing.players$Percentage <- round(frequency.percentage.missing.players$Frequency/(sum(frequency.percentage.classes$Frequency) + 17) * 100, 2) # 17 missing players.
+frequency.percentage.missing.players$Percentage <- 
+  round(frequency.percentage.missing.players$Frequency / 
+          (sum(frequency.percentage.classes$Frequency) + 17) * 100, 2) # 17 missing players.
 frequency.percentage.missing.players
 ```
 
 17 players were missing. We do not know if these players were missing since the
 beginning of the game (for some reason sometimes teams can contain less than 5 players),
-or if they disconnected. 
+or if they disconnected.
+
+Note: If the percentage of missing players and the sum of the percentages of each
+class are summed, the result is 100.2% instead of 100%. This is because of the 
+rounding that was done on each percentage to avoid having large numbers on the 
+table. The real values are 98.57143% and 1.428571%.
 
 #### Is there a repeated team composition?
 
@@ -488,7 +504,8 @@ than once.
 
 ```{r, echo=FALSE}
 # Find matches that had at least 3 of the same professions
-three.or.more <- team.composition[apply(team.composition, 1, function(X) any(table(X) >= 3)),]
+three.or.more <- 
+  team.composition[apply(team.composition, 1, function(X) any(table(X) >= 3)),]
 
 scores.for.red <- df$winner  # 1 means red lose, 0 means red won (0 means victory, 1 defeat)
 scores.for.blue <- sapply(df$winner, function(x) if (x == 1) { 0 } else { 1 })
@@ -497,7 +514,8 @@ scores.for.blue <- as.data.frame(scores.for.blue)
 colnames(scores.for.red) <- c("Result")
 colnames(scores.for.blue) <- c("Result")
 team.composition.result <- data.frame(result = numeric(0))
-team.composition.result <- rbind(team.composition.result, scores.for.red, scores.for.blue)
+team.composition.result <- 
+  rbind(team.composition.result, scores.for.red, scores.for.blue)
 
 # Get the result of the particular matches using the indexes of three.or.more
 three.or.more <- cbind(three.or.more, 
@@ -594,7 +612,6 @@ classification error obtained in this phase is `r test.classification.error`%.
 This is the confusion matrix for the test dataset:
 
 ```{r, echo=FALSE}                           
-#pred.confusion.matrix
 pred.confusion.matrix <- cbind(pred.confusion.matrix, 
                                c(pred.confusion.matrix[1, 2] / 
                                    (pred.confusion.matrix[1,1] + pred.confusion.matrix[1,2]), 
@@ -668,7 +685,7 @@ bayes.test.confusion.matrix <-
 colnames(bayes.test.confusion.matrix) <- c("lost", "won", "class.error")
 bayes.test.confusion.matrix
 
-#Calculate the overall classification error
+# Calculate the overall classification error
 bayes.test.classification.error <- round((bayes.test.confusion.matrix[2, 1] +
                                                 bayes.test.confusion.matrix[1, 2]) /
                                            (bayes.test.confusion.matrix[1,1] +
