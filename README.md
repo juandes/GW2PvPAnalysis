@@ -18,6 +18,8 @@ The analysis was done using R.
 
 Link to the report: [PvP in Guild Wars 2: A data analysis](http://juandes.github.io/GW2PvPAnalysis/docs/gw2_pvp_analysis)
 
+GitHub page about the project: [PvP in Guild Wars 2: A data analysis - home page](http://juandes.github.io/GW2PvPAnalysis/)
+
 ## Project
 
-This repository contains the Markdown file that holds the analysis plus the R code, an R script with just the code, the original dataset used (in CSV), the final dataset (also in CSV), a codebook with some information about the datasets and the HTML version of the report.
+This repository contains the Markdown file that holds the analysis plus the R code, an R script with just the code, the original dataset used (in CSV), a codebook with some information about the datasets and the HTML version of the report.
